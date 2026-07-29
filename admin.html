@@ -4,97 +4,308 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Pykachu Hunt - Admin</title>
+    <title>Pikachu Hunt - Admin</title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#4361ee">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@300;400;700&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js').catch(err => { });
+                navigator.serviceWorker.register('sw.js').catch(err => { });
             });
         }
     </script>
-    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        :root {
+            --neon-green: #00f0ff;
+            --neon-blue: #4361ee;
+            --dark-bg: #030712;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+        }
+
+        .font-pixel {
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(67, 97, 238, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(67, 97, 238, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        .cyber-grid::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, transparent 0%, var(--dark-bg) 90%);
+        }
+
+        .glass-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .status-badge {
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .log-row:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 2px solid #60a5fa;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes pulse-alert {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .pulse-alert {
+            animation: pulse-alert 2s infinite;
+        }
+
+        .tab-btn {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+        }
+
+        .tab-btn:hover {
+            background: rgba(51, 65, 85, 0.5);
+            color: #cbd5e1;
+        }
+
+        .tab-btn.active {
+            background: #4361ee;
+            color: white;
+            box-shadow: 0 0 15px rgba(67, 97, 238, 0.4);
+            border-color: #4361ee;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .container-padding {
+                padding-left: 12px !important;
+                padding-right: 12px !important;
+            }
+
+            .text-responsive {
+                font-size: clamp(12px, 3vw, 16px) !important;
+            }
+
+            .text-responsive-sm {
+                font-size: clamp(10px, 2.5vw, 14px) !important;
+            }
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
+        button,
+        select,
+        input {
+            min-height: 44px;
+            min-width: 44px;
+        }
+    </style>
 </head>
 
 <body class="min-h-screen flex flex-col">
     <div class="cyber-grid"></div>
 
-    <!-- Header -->
     <header class="glass-panel sticky top-0 z-50 border-b border-indigo-500/20" style="padding-top: var(--safe-top);">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between container-padding">
             <div class="flex items-center gap-3">
                 <div class="relative">
                     <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse absolute -top-1 -right-1"></div>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-indigo-400" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                     </svg>
                 </div>
                 <div>
-                    <h1 class="font-pixel text-responsive bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+                    <h1
+                        class="font-pixel text-responsive bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
                         Pikachu<span class="text-white">Hunt</span></h1>
-                    <p class="text-[10px] text-slate-500 font-mono tracking-widest uppercase hidden sm:block">Admin Command Node</p>
+                    <p class="text-[10px] text-slate-500 font-mono tracking-widest uppercase hidden sm:block">Admin
+                        Command Node</p>
                     <p class="text-[8px] text-slate-500 font-mono tracking-widest uppercase sm:hidden">ADMIN</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-2">
-                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/50 border border-slate-700">
+                <div
+                    class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/50 border border-slate-700">
                     <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                     </span>
                     <span id="systemStatus" class="text-xs font-mono text-green-400">ONLINE</span>
                 </div>
 
                 <div class="flex sm:hidden items-center gap-1">
-                    <button onclick="clearCache()" id="clearBtn" class="group relative p-2 bg-amber-600 hover:bg-amber-500 transition-all rounded-lg overflow-hidden">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                    <button onclick="clearCache()" id="clearBtn"
+                        class="group relative p-2 bg-amber-600 hover:bg-amber-500 transition-all rounded-lg overflow-hidden">
+                        <div class="flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </div>
                     </button>
-                    <button onclick="toggleAutoRefresh()" id="refreshBtn" class="group relative p-2 bg-indigo-600 hover:bg-indigo-500 transition-all rounded-lg overflow-hidden">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
+
+                    <button onclick="toggleAutoRefresh()" id="refreshBtn"
+                        class="group relative p-2 bg-indigo-600 hover:bg-indigo-500 transition-all rounded-lg overflow-hidden">
+                        <div class="flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                </path>
+                            </svg>
+                        </div>
                     </button>
-                    <button onclick="wipeData()" id="wipeBtn" class="group relative p-2 bg-red-600 hover:bg-red-500 transition-all rounded-lg overflow-hidden">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M9 6v12m6-12v12M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14" />
-                        </svg>
+
+                    <button onclick="wipeData()" id="wipeBtn"
+                        class="group relative p-2 bg-red-600 hover:bg-red-500 transition-all rounded-lg overflow-hidden">
+                        <div class="flex items-center justify-center">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 6h18M9 6v12m6-12v12M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14" />
+                            </svg>
+                        </div>
                     </button>
                 </div>
 
                 <div class="hidden sm:flex items-center gap-2">
-                    <button onclick="clearCache()" id="clearBtnDesktop" class="group relative px-3 py-2 bg-amber-600 hover:bg-amber-500 transition-all rounded-lg overflow-hidden">
-                        <div class="absolute inset-0 bg-white/20 group-hover:translate-x-full duration-500 transform -skew-x-12 -translate-x-full"></div>
+                    <button onclick="clearCache()" id="clearBtn"
+                        class="group relative px-3 py-2 bg-amber-600 hover:bg-amber-500 transition-all rounded-lg overflow-hidden">
+                        <div
+                            class="absolute inset-0 bg-white/20 group-hover:translate-x-full duration-500 transform -skew-x-12 -translate-x-full">
+                        </div>
                         <div class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                             <span class="text-xs font-bold text-white">CLEAR</span>
                         </div>
                     </button>
-                    <button onclick="toggleAutoRefresh()" id="refreshBtnDesktop" class="group relative px-3 py-2 bg-indigo-600 hover:bg-indigo-500 transition-all rounded-lg overflow-hidden">
-                        <div class="absolute inset-0 bg-white/20 group-hover:translate-x-full duration-500 transform -skew-x-12 -translate-x-full"></div>
+
+                    <button onclick="toggleAutoRefresh()" id="refreshBtn"
+                        class="group relative px-3 py-2 bg-indigo-600 hover:bg-indigo-500 transition-all rounded-lg overflow-hidden">
+                        <div
+                            class="absolute inset-0 bg-white/20 group-hover:translate-x-full duration-500 transform -skew-x-12 -translate-x-full">
+                        </div>
                         <div class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                </path>
                             </svg>
                             <span class="text-xs font-bold text-white">SYNC</span>
                         </div>
                     </button>
-                    <button onclick="wipeData()" id="wipeBtnDesktop" class="group relative px-3 py-2 bg-red-600 hover:bg-red-500 transition-all rounded-lg overflow-hidden">
-                        <div class="absolute inset-0 bg-white/20 group-hover:translate-x-full duration-500 transform -skew-x-12 -translate-x-full"></div>
+
+                    <button onclick="wipeData()" id="wipeBtn"
+                        class="group relative px-3 py-2 bg-red-600 hover:bg-red-500 transition-all rounded-lg overflow-hidden">
+                        <div
+                            class="absolute inset-0 bg-white/20 group-hover:translate-x-full duration-500 transform -skew-x-12 -translate-x-full">
+                        </div>
                         <div class="flex items-center gap-2">
                             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M9 6v12m6-12v12M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 6h18M9 6v12m6-12v12M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14" />
                             </svg>
                             <span class="text-xs font-bold text-white">WIPE</span>
                         </div>
@@ -104,14 +315,16 @@
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 container-padding">
-        <!-- Sidebar -->
+    <main
+        class="flex-1 max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 container-padding">
         <aside class="lg:col-span-3 space-y-4">
             <div class="glass-panel p-4 sm:p-5 rounded-xl border-l-4 border-indigo-500">
                 <div class="flex justify-between items-start mb-2">
                     <div class="p-2 bg-indigo-500/10 rounded-lg">
                         <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
                         </svg>
                     </div>
                     <span class="text-xs text-slate-500 font-mono">LIVE</span>
@@ -124,7 +337,8 @@
                 <div class="flex justify-between items-start mb-2">
                     <div class="p-2 bg-emerald-500/10 rounded-lg">
                         <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
                     <span class="text-xs text-slate-500 font-mono">TOTAL</span>
@@ -136,23 +350,43 @@
             <div class="glass-panel p-4 sm:p-5 rounded-xl">
                 <h3 class="text-indigo-400 text-xs font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
+                        </path>
                     </svg>
-                    Filters
+                    Mission Filters
                 </h3>
                 <div class="space-y-4">
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                         </span>
-                        <input type="text" id="teamSearch" onkeyup="renderCurrentView()" placeholder="Search team..." class="w-full bg-slate-900/50 border border-slate-700 text-slate-200 text-xs rounded-lg pl-9 pr-3 py-3 sm:py-2.5 focus:outline-none focus:border-indigo-500 transition-colors">
+                        <input type="text" id="teamSearch" onkeyup="renderLogs()" placeholder="Search team..."
+                            class="w-full bg-slate-900/50 border border-slate-700 text-slate-200 text-xs rounded-lg pl-9 pr-3 py-3 sm:py-2.5 focus:outline-none focus:border-indigo-500 transition-colors">
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] text-slate-500 font-bold uppercase mb-2 block">Specialty Type</label>
+                        <select id="typeFilter" onchange="renderLogs()"
+                            class="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-3 py-3 sm:py-2 focus:border-indigo-500 outline-none">
+                            <option value="ALL">ALL TYPES</option>
+                            <option value="GRASS">🌿 GRASS</option>
+                            <option value="FIRE">🔥 FIRE</option>
+                            <option value="WATER">💧 WATER</option>
+                            <option value="GROUND">🌍 GROUND</option>
+                            <option value="CHARIZARD">🐲 CHARIZARD</option>
+                            <option value="GRENINJA">🐸 GRENINJA</option>
+                            <option value="PIKACHU">⚡ PIKACHU</option>
+                        </select>
                     </div>
 
                     <div>
                         <label class="text-[10px] text-slate-500 font-bold uppercase mb-2 block">Level Filter</label>
-                        <select id="levelFilter" onchange="renderCurrentView()" class="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-3 py-3 sm:py-2 focus:border-indigo-500 outline-none">
+                        <select id="levelFilter" onchange="renderLogs()"
+                            class="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-lg px-3 py-3 sm:py-2 focus:border-indigo-500 outline-none">
                             <option value="ALL">ALL LEVELS</option>
                             <option value="L1">LEVEL 1</option>
                             <option value="L2">LEVEL 2</option>
@@ -161,71 +395,527 @@
                     </div>
 
                     <div class="grid grid-cols-1 gap-2">
-                        <button onclick="setSecurityFilter('ALL')" id="filterAll" class="security-filter-btn w-full text-left px-3 py-3 sm:py-2 rounded-lg text-xs font-medium bg-indigo-600 text-white transition-all flex justify-between items-center group">
+                        <button onclick="setSecurityFilter('ALL')" id="filterAll"
+                            class="security-filter-btn w-full text-left px-3 py-3 sm:py-2 rounded-lg text-xs font-medium bg-indigo-600 text-white transition-all flex justify-between items-center group">
                             <span>Show All Activity</span>
                             <span class="bg-black/20 px-1.5 rounded text-[10px] group-hover:bg-black/40">●</span>
                         </button>
-                        <button onclick="setSecurityFilter('HINT')" id="filterHint" class="security-filter-btn w-full text-left px-3 py-3 sm:py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 transition-all flex justify-between items-center bg-transparent border border-slate-700/50">
+                        <button onclick="setSecurityFilter('HINT')" id="filterHint"
+                            class="security-filter-btn w-full text-left px-3 py-3 sm:py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 transition-all flex justify-between items-center bg-transparent border border-slate-700/50">
                             <span>Hint Used</span>
-                            <span class="text-yellow-500 text-[10px]">i</span>
+                            <span class="text-yellow-500 text-[10px]">💡</span>
                         </button>
-                        <button onclick="setSecurityFilter('MALPRACTICE')" id="filterMalpractice" class="security-filter-btn w-full text-left px-3 py-3 sm:py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 transition-all flex justify-between items-center bg-transparent border border-slate-700/50">
+                        <button onclick="setSecurityFilter('MALPRACTICE')" id="filterMalpractice"
+                            class="security-filter-btn w-full text-left px-3 py-3 sm:py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 transition-all flex justify-between items-center bg-transparent border border-slate-700/50">
                             <span>Malpractice Detect</span>
-                            <span class="text-red-500 text-[10px]">!</span>
+                            <span class="text-red-500 text-[10px]">⚠️</span>
                         </button>
                     </div>
                 </div>
 
                 <div class="mt-6 pt-6 border-t border-slate-800">
-                    <a href="https://docs.google.com/spreadsheets/d/1GTHTvOZ5WtETFXRkEn9Kd5k7L44klUmrrsW4Z1Dd8YM/edit?gid=241918859#gid=241918859" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 sm:py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 transition-all">
+                    <a href="https://docs.google.com/spreadsheets/d/1MtuD9B1veNjlokeToeRZ1gRTZqjKiT55hd0R4y9UO-c/edit?gid=1609955468#gid=1609955468"
+                        target="_blank"
+                        class="flex items-center justify-center gap-2 w-full py-3 sm:py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 transition-all">
                         <span>OPEN MASTER GOOGLE SHEET</span>
                     </a>
                 </div>
             </div>
         </aside>
 
-        <!-- Main Panel -->
         <div class="lg:col-span-9 flex flex-col h-full min-h-[400px] sm:min-h-[500px]">
-            <!-- Navigation Tabs -->
             <div class="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
-                <button onclick="setActiveTab('LEADERBOARD')" id="tab-LEADERBOARD" class="tab-btn active px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">LEADERBOARD</button>
-                <button onclick="setActiveTab('L1')" id="tab-L1" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">LEVEL 1</button>
-                <button onclick="setActiveTab('L2')" id="tab-L2" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">LEVEL 2</button>
-                <button onclick="setActiveTab('L3')" id="tab-L3" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">LEVEL 3</button>
-                <button onclick="setActiveTab('ROSTER')" id="tab-ROSTER" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">TEAM ROSTER</button>
+                <button onclick="setActiveTab('REG')" id="tab-REG"
+                    class="tab-btn active px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">REGISTRATION</button>
+                <button onclick="setActiveTab('L1')" id="tab-L1"
+                    class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">LEVEL
+                    1</button>
+                <button onclick="setActiveTab('L2')" id="tab-L2"
+                    class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">LEVEL
+                    2</button>
+                <button onclick="setActiveTab('L3')" id="tab-L3"
+                    class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">LEVEL
+                    3</button>
             </div>
 
             <div class="glass-panel flex-1 rounded-xl overflow-hidden flex flex-col">
-                <!-- View Header -->
-                <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
+                <div
+                    class="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
                     <h2 class="text-sm font-bold text-white flex items-center gap-2">
                         <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                        <span id="viewTitle">LEADERBOARD</span>
+                        <span class="hidden sm:inline">TEAM STATUS MONITOR</span>
+                        <span class="sm:hidden">MONITOR</span>
                         <span id="dataSourceIndicator" class="text-[10px] text-slate-500 font-mono ml-2">[LIVE]</span>
                     </h2>
                     <span class="text-[10px] text-slate-500 font-mono truncate pl-2" id="lastUpdated">SYNCING...</span>
                 </div>
 
-                <!-- Scrollable View Area -->
-                <div id="viewContainer" class="flex-1 overflow-y-auto bg-slate-900/20 font-mono text-xs">
+                <div
+                    class="grid grid-cols-12 gap-1 px-2 py-2 sm:py-3 bg-slate-950/80 border-b border-slate-800 text-[7px] sm:text-[8px] font-bold text-slate-500 uppercase tracking-widest font-mono text-center">
+                    <div class="col-span-1">#</div>
+                    <div class="col-span-2 text-left">Team</div>
+                    <div class="col-span-1 border-r border-slate-800">Scan</div>
+
+                    <div class="col-span-1 text-emerald-600" title="Levels Unlocked">Prev ✓</div>
+                    <div class="col-span-1 text-red-600 border-r border-slate-800" title="Unlock Errors">Prev ✕</div>
+
+                    <div class="col-span-1 text-white">Puzzle</div>
+
+                    <div class="col-span-1 text-red-600" title="Current Puzzle Errors">Curr ✕</div>
+                    <div class="col-span-1 text-emerald-600 border-r border-slate-800" title="Current Puzzle Status">
+                        Curr ✓</div>
+
+                    <div class="col-span-1">Hint</div>
+                    <div class="col-span-1">Tabs</div>
+                    <div class="col-span-1">Time</div>
+                </div>
+
+                <div id="logsContainer"
+                    class="flex-1 overflow-y-auto divide-y divide-slate-800/50 bg-slate-900/20 font-mono text-xs">
                     <div class="flex flex-col items-center justify-center h-40 text-slate-600 gap-2">
                         <svg class="w-8 h-8 animate-spin text-indigo-500/30" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
                         </svg>
                         <span class="text-xs">ESTABLISHING UPLINK...</span>
                     </div>
                 </div>
 
-                <!-- Footer -->
-                <div class="px-3 py-2 bg-slate-950/50 border-t border-slate-800 text-[9px] sm:text-[10px] text-slate-600 flex justify-between font-mono">
+                <div
+                    class="px-3 py-2 bg-slate-950/50 border-t border-slate-800 text-[9px] sm:text-[10px] text-slate-600 flex justify-between font-mono">
                     <span class="truncate pr-2">SECURE: TLS_1.3</span>
-                    <span class="truncate pl-2" id="versionDisplay">v2.6.0</span>
+                    <span class="truncate pl-2">v2.5.1</span>
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="js/admin.js"></script>
+    <script>
+        const CONFIG = {
+            SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby7qK-u9e6pO_haPStxbkGsL1yomPhyG-AWgDL_Z0Oy2C64MPCljtvJOSOt4KeLIrSg/exec',
+            REFRESH_RATE: 5000,
+            MAX_LOGS: 500,
+            VERSION: '2.5.1'
+        };
+
+        let state = {
+            logs: [],
+            isFetching: false,
+            autoRefresh: true,
+            filter: 'ALL',
+            activeTab: 'REG',
+            refreshTimer: null,
+            usingCachedData: false
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedVersion = localStorage.getItem('pykachuVersion');
+            if (storedVersion !== CONFIG.VERSION) {
+                localStorage.removeItem('pykachuLogs');
+                localStorage.setItem('pykachuVersion', CONFIG.VERSION);
+                console.log('Cache cleared due to version update');
+            }
+
+            const cached = localStorage.getItem('pykachuLogs');
+            if (cached) {
+                try {
+                    state.logs = JSON.parse(cached);
+                    state.usingCachedData = true;
+                    updateDataSourceIndicator();
+                    renderLogs();
+                } catch (e) {
+                    console.error('Failed to parse cached logs:', e);
+                    state.logs = [];
+                    state.usingCachedData = false;
+                }
+            }
+
+            fetchData();
+            startPolling();
+
+            document.addEventListener('focusin', function (e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+                    setTimeout(() => {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                }
+            });
+        });
+
+        function updateDataSourceIndicator() {
+            const indicator = document.getElementById('dataSourceIndicator');
+            if (state.usingCachedData) {
+                indicator.textContent = '[CACHED]';
+                indicator.className = 'text-[10px] text-amber-500 font-mono ml-2 pulse-alert';
+            } else {
+                indicator.textContent = '[LIVE]';
+                indicator.className = 'text-[10px] text-emerald-500 font-mono ml-2';
+            }
+        }
+
+        function startPolling() {
+            if (state.refreshTimer) clearInterval(state.refreshTimer);
+            state.refreshTimer = setInterval(fetchData, CONFIG.REFRESH_RATE);
+        }
+
+        async function fetchData() {
+            if (state.isFetching || !state.autoRefresh) return;
+            state.isFetching = true;
+
+            try {
+                const timestamp = new Date().getTime();
+                const url = `${CONFIG.SCRIPT_URL}?t=${timestamp}`;
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const rawData = await response.json();
+                const newLogs = Array.isArray(rawData) ? rawData : [];
+
+                if (newLogs.length === 0) {
+                    console.log('Google Sheet returned empty data, clearing cache');
+                    state.logs = [];
+                    localStorage.removeItem('pykachuLogs');
+                    state.usingCachedData = false;
+                } else {
+                    state.logs = newLogs;
+                    localStorage.setItem('pykachuLogs', JSON.stringify(state.logs));
+                    state.usingCachedData = false;
+                }
+
+                updateDataSourceIndicator();
+                renderLogs();
+
+                document.getElementById('lastUpdated').textContent = 'UPDATED: ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('systemStatus').textContent = 'ONLINE';
+                document.getElementById('systemStatus').className = 'text-xs font-mono text-green-400';
+
+            } catch (error) {
+                console.warn('Fetch error:', error);
+                document.getElementById('lastUpdated').textContent = 'RETRYING...';
+                document.getElementById('systemStatus').textContent = "OFFLINE";
+                document.getElementById('systemStatus').className = 'text-xs font-mono text-pink-500';
+
+                if (state.logs.length === 0) {
+                    const cached = localStorage.getItem('pykachuLogs');
+                    if (cached) {
+                        try {
+                            state.logs = JSON.parse(cached);
+                            state.usingCachedData = true;
+                            updateDataSourceIndicator();
+                            renderLogs();
+                        } catch (e) {
+                            console.error('Failed to use cached data:', e);
+                        }
+                    }
+                }
+            } finally {
+                state.isFetching = false;
+            }
+        }
+
+        function setActiveTab(tab) {
+            state.activeTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            renderLogs();
+        }
+
+        function setSecurityFilter(filter) {
+            state.filter = filter;
+            document.querySelectorAll('.security-filter-btn').forEach(btn => {
+                btn.className = 'security-filter-btn w-full text-left px-3 py-3 sm:py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 transition-all flex justify-between items-center bg-transparent border border-slate-700/50';
+            });
+
+            const activeMap = { 'ALL': 'filterAll', 'HINT': 'filterHint', 'MALPRACTICE': 'filterMalpractice' };
+            const activeBtn = document.getElementById(activeMap[filter]);
+            activeBtn.className = 'security-filter-btn w-full text-left px-3 py-3 sm:py-2 rounded-lg text-xs font-medium bg-indigo-600 text-white transition-all flex justify-between items-center group';
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const container = document.getElementById('logsContainer');
+            const header = container.previousElementSibling;
+            const searchTerm = document.getElementById('teamSearch').value.toLowerCase();
+            const typeFilter = document.getElementById('typeFilter').value;
+            const levelFilterDropdown = document.getElementById('levelFilter').value;
+
+            if (state.activeTab === 'REG') {
+                header.innerHTML = `
+                    <div class="col-span-1">#</div>
+                    <div class="col-span-5 text-left pl-4">Team Name</div>
+                    <div class="col-span-2">Level</div>
+                    <div class="col-span-2">Type</div>
+                    <div class="col-span-2">Time</div>
+                `;
+                header.className = "grid grid-cols-12 gap-1 px-2 py-3 bg-slate-950/80 border-b border-slate-800 text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono text-center";
+            } else {
+                header.innerHTML = `
+                    <div class="col-span-1">#</div>
+                    <div class="col-span-2 text-left pr-2">Team</div>
+                    <div class="col-span-1 border-r border-slate-800">Scan</div>
+                    <div class="col-span-1 text-emerald-600">Prev ✓</div>
+                    <div class="col-span-1 text-red-600 border-r border-slate-800">Prev ✕</div>
+                    <div class="col-span-1 text-white">Puzzle</div>
+                    <div class="col-span-1 text-red-600">Curr ✕</div>
+                    <div class="col-span-1 text-emerald-600 border-r border-slate-800">Curr ✓</div>
+                    <div class="col-span-1">Hint</div>
+                    <div class="col-span-1">Tabs</div>
+                    <div class="col-span-1">Time</div>
+                `;
+                header.className = "grid grid-cols-12 gap-1 px-2 py-3 bg-slate-950/80 border-b border-slate-800 text-[7px] sm:text-[8px] font-bold text-slate-500 uppercase tracking-widest font-mono text-center";
+            }
+
+            const teamMeta = {};
+            state.logs.forEach(log => {
+                if (log.action === 'REGISTRATION' && log.teamName) {
+                    teamMeta[log.teamName.toUpperCase()] = log.mission;
+                }
+            });
+
+            const entries = {};
+            const sortedLogs = [...state.logs].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            const lastPuzzleForTeam = {};
+
+            sortedLogs.forEach(log => {
+                const teamName = (log.teamName || 'Unknown').toString().trim().toUpperCase();
+                if (!teamName) return;
+
+                let pId = log.puzzleId;
+                if (pId === 'undefined' || pId === 'null' || pId === '') pId = null;
+                if (pId === null && log.action === 'REGISTRATION') pId = 0;
+                if (pId === null && lastPuzzleForTeam[teamName]) {
+                    pId = lastPuzzleForTeam[teamName];
+                }
+                if (pId === null) return;
+                pId = String(pId).trim();
+                if (pId === 'undefined' || pId === 'null' || pId === '') return;
+                if (pId !== '0') lastPuzzleForTeam[teamName] = pId;
+
+                const entryKey = `${teamName}_${pId}`;
+
+                if (!entries[entryKey]) {
+                    entries[entryKey] = {
+                        key: entryKey,
+                        name: teamName,
+                        puzzleId: pId,
+                        mission: teamMeta[teamName] || 'UNKNOWN',
+                        scanQr: '-',
+                        lastActive: new Date(log.timestamp),
+                        unlockSuccesses: 0,
+                        unlockFails: 0,
+                        currentFails: 0,
+                        currentStatus: 'IDLE',
+                        hintUsed: false,
+                        tabSwitches: 0,
+                    };
+                }
+
+                const entry = entries[entryKey];
+                const logTime = new Date(log.timestamp);
+                if (logTime > entry.lastActive) entry.lastActive = logTime;
+
+                if (log.action === 'REGISTRATION') {
+                    entry.currentStatus = 'READY';
+                    if (log.mission) entry.mission = log.mission;
+                }
+                else if (log.action === 'QR_SCANNED') {
+                    entry.scanQr = log.linkId || ('Link-' + log.puzzleId);
+                }
+                else if (log.action === 'UNLOCK_FAILED') {
+                    entry.unlockFails++;
+                    if (log.attemptedLink && log.attemptedLink !== 'unknown') {
+                        entry.scanQr = log.attemptedLink;
+                    }
+                }
+                else if (log.action === 'PUZZLE_UNLOCKED') {
+                    entry.unlockSuccesses++;
+                    entry.scanQr = log.puzzleLink || 'Link-' + log.puzzleId;
+                    entry.currentStatus = 'SOLVING';
+                }
+                else if (log.action === 'SOLVED') {
+                    entry.currentStatus = 'SUCCESS';
+                }
+                else if (log.action === 'WRONG_ATTEMPT') {
+                    entry.currentFails++;
+                    entry.currentStatus = 'RETRYING';
+                }
+                else if (log.action === 'HINT_USED') {
+                    entry.hintUsed = true;
+                }
+                else if (log.action === 'PENALTY') {
+                    if (typeof log.penaltyCount === 'number') {
+                        entry.tabSwitches = log.penaltyCount;
+                    } else {
+                        entry.tabSwitches++;
+                    }
+                }
+            });
+
+            let leaderboard = Object.values(entries);
+
+            if (searchTerm) {
+                leaderboard = leaderboard.filter(t => t.name.toLowerCase().includes(searchTerm));
+            }
+
+            if (state.activeTab === 'REG') {
+                leaderboard = leaderboard.filter(t => t.puzzleId === '0');
+            } else {
+                leaderboard = leaderboard.filter(t => t.mission && t.mission.includes(state.activeTab));
+            }
+
+            if (levelFilterDropdown !== 'ALL') {
+                leaderboard = leaderboard.filter(t => t.mission && t.mission.includes(levelFilterDropdown));
+            }
+
+            if (typeFilter !== 'ALL') {
+                leaderboard = leaderboard.filter(t => t.mission && t.mission.includes(typeFilter));
+            }
+
+            if (state.filter === 'HINT') {
+                leaderboard = leaderboard.filter(t => t.hintUsed === true);
+            }
+            if (state.filter === 'MALPRACTICE') {
+                leaderboard = leaderboard.filter(t => t.tabSwitches > 0 || t.unlockFails > 5);
+            }
+
+            leaderboard.sort((a, b) => b.lastActive - a.lastActive);
+
+            const uniqueTeams = new Set(leaderboard.map(e => e.name)).size;
+            document.getElementById('teamCount').textContent = uniqueTeams;
+            document.getElementById('badgeCount').textContent = leaderboard.filter(t => t.currentStatus === 'SUCCESS').length;
+
+            if (leaderboard.length === 0) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-slate-600 opacity-50 fade-in">
+                        <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span class="font-mono text-xs">NO DATA AVAILABLE</span>
+                        ${state.usingCachedData ? '<span class="text-[10px] text-amber-500 mt-1">(Using cached data)</span>' : ''}
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = leaderboard.map((team, index) => {
+                const timeStr = team.lastActive.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+                if (state.activeTab === 'REG') {
+                    const missionParts = (team.mission || "UNKNOWN_UNKNOWN").split('_');
+                    const levelLabel = missionParts[0] || "N/A";
+                    const typeLabel = missionParts[1] || "N/A";
+
+                    return `
+                    <div class="grid grid-cols-12 gap-1 px-2 py-3 border-l-2 border-transparent hover:bg-white/5 transition-all items-center text-[10px] sm:text-xs text-center fade-in">
+                        <div class="col-span-1 text-slate-600 font-mono">${index + 1}</div>
+                        <div class="col-span-5 text-left pl-4 font-bold text-slate-200 uppercase tracking-tight">${team.name}</div>
+                        <div class="col-span-2"><span class="bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded border border-indigo-500/20 font-bold">${levelLabel}</span></div>
+                        <div class="col-span-2 text-slate-400 font-medium">${typeLabel}</div>
+                        <div class="col-span-2 text-slate-500 font-mono text-[10px]">${timeStr}</div>
+                    </div>`;
+                }
+
+                const hintBadge = team.hintUsed ?
+                    '<span class="text-yellow-500 font-bold text-[7px] sm:text-[8px]">USED</span>' :
+                    '<span class="text-slate-600 text-[7px] sm:text-[8px]">-</span>';
+
+                let statusBadge = `<span class="text-blue-400 text-[7px] sm:text-[8px]">${team.currentStatus}</span>`;
+                if (team.currentStatus === 'SUCCESS') {
+                    statusBadge = '<span class="text-emerald-400 font-bold text-[7px] sm:text-[8px]">SOLVED</span>';
+                }
+                if (team.currentStatus === 'RETRYING') {
+                    statusBadge = '<span class="text-red-400 animate-pulse text-[7px] sm:text-[8px]">RETRYING</span>';
+                }
+                if (team.currentStatus === 'IDLE' || team.currentStatus === 'READY') {
+                    statusBadge = `<span class="text-slate-500 text-[7px] sm:text-[8px]">${team.currentStatus}</span>`;
+                }
+
+                const puzzleDisplay = team.puzzleId === '0' ? 'REG' : team.puzzleId;
+
+                return `
+                <div class="grid grid-cols-12 gap-1 px-2 py-2 sm:py-3 border-l-2 border-transparent transition-all items-center hover:bg-white/5 text-[8px] sm:text-[9px] text-center fade-in">
+                    <div class="col-span-1 text-slate-500 font-mono">${index + 1}</div>
+                    <div class="col-span-2 text-left font-bold text-slate-200 truncate" title="${team.name}">${team.name}</div>
+                    <div class="col-span-1 font-mono text-indigo-400 truncate border-r border-slate-800 pr-1">${team.scanQr.replace('Link-', '').substring(0, 3)}</div>
+                    <div class="col-span-1 font-bold text-emerald-500">${team.unlockSuccesses}</div>
+                    <div class="col-span-1 font-bold text-red-500 border-r border-slate-800 pr-1">${team.unlockFails > 0 ? team.unlockFails : '-'}</div>
+                    <div class="col-span-1 font-bold text-white bg-slate-800 rounded px-1 py-0.5">${puzzleDisplay}</div>
+                    <div class="col-span-1 font-bold text-red-500">${team.currentFails > 0 ? team.currentFails : '-'}</div>
+                    <div class="col-span-1 border-r border-slate-800 pr-1">${statusBadge}</div>
+                    <div class="col-span-1">${hintBadge}</div>
+                    <div class="col-span-1 font-mono text-pink-500 font-bold">${team.tabSwitches > 0 ? team.tabSwitches : '-'}</div>
+                    <div class="col-span-1 text-slate-500 font-mono text-[7px] sm:text-[8px]">${timeStr}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function clearCache() {
+            if (confirm('Clear all cached data and force fresh fetch from Google Sheets?')) {
+                localStorage.removeItem('pykachuLogs');
+                state.logs = [];
+                state.usingCachedData = false;
+                fetchData();
+                updateDataSourceIndicator();
+                const status = document.getElementById('systemStatus');
+                const lastUpdated = document.getElementById('lastUpdated');
+                status.textContent = 'CACHE CLEARED';
+                status.className = 'text-xs font-mono text-amber-400 pulse-alert';
+                lastUpdated.textContent = 'FETCHING FRESH DATA...';
+                setTimeout(() => {
+                    status.textContent = 'ONLINE';
+                    status.className = 'text-xs font-mono text-green-400';
+                }, 3000);
+            }
+        }
+
+        function toggleAutoRefresh() {
+            state.autoRefresh = !state.autoRefresh;
+            const btn = document.getElementById('refreshBtn');
+            const status = document.getElementById('systemStatus');
+
+            if (state.autoRefresh) {
+                startPolling();
+                btn.classList.remove('bg-slate-700', 'bg-indigo-500');
+                btn.classList.add('bg-indigo-600');
+                status.textContent = "ONLINE";
+                status.className = 'text-xs font-mono text-green-400';
+            } else {
+                clearInterval(state.refreshTimer);
+                btn.classList.remove('bg-indigo-600');
+                btn.classList.add('bg-slate-700');
+                status.textContent = "SYNC PAUSED";
+                status.className = 'text-xs font-mono text-orange-400';
+            }
+        }
+
+        function wipeData() {
+            if (confirm('Wipe ALL displayed data? This will clear the UI but keep cache. Use "Clear Cache" to remove stored data.')) {
+                const container = document.getElementById('logsContainer');
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-slate-600 opacity-50 fade-in">
+                        <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span class="font-mono text-xs">DATA WIPED - REFRESHING...</span>
+                    </div>`;
+
+                document.getElementById('teamCount').textContent = '0';
+                document.getElementById('badgeCount').textContent = '0';
+
+                const status = document.getElementById('systemStatus');
+                status.textContent = 'DATA WIPED';
+                status.className = 'text-xs font-mono text-amber-400 pulse-alert';
+
+                setTimeout(() => {
+                    if (state.autoRefresh) {
+                        fetchData();
+                    }
+                }, 2000);
+            }
+        }
+    </script>
 </body>
+
 </html>
