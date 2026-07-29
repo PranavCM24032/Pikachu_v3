@@ -73,7 +73,8 @@ body {
     height: -webkit-fill-available;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     background: #000;
     font-family: 'JetBrains Mono', monospace;
     min-height: 100vh;
@@ -81,6 +82,12 @@ body {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
     overscroll-behavior: none;
+    scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;
 }
 .bg-pokeRed {
     background-color: var(--pokeRed);
