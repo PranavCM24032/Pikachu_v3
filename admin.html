@@ -682,7 +682,7 @@
 
             sortedLogs.forEach(log => {
                 const teamName = (log.teamName || 'Unknown').toString().trim().toUpperCase();
-                if (!teamName) return;
+                if (!teamName || teamName === 'UNKNOWN' || teamName === 'NO TEAM') return;
 
                 let pId = log.puzzleId;
                 if (pId === 'undefined' || pId === 'null' || pId === '') pId = null;
