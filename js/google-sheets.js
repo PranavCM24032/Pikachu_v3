@@ -1,11 +1,36 @@
 // ==============================
 // GOOGLE SHEETS INTEGRATION
 // ==============================
-let submissionQueue = [];
-let isSubmitting = false;
+const SESSION_BUFFER_KEY = 'pykachuSessionBuffer';
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
+function getSessionBuffer() {
+    try {
+        return JSON.parse(localStorage.getItem(SESSION_BUFFER_KEY) || '[]');
+    } catch (e) {
+        return [];
+    }
+}
+
+function addToSessionBuffer(payload) {
+    const buffer = getSessionBuffer();
+    buffer.push(payload);
+    try {
+        localStorage.setItem(SESSION_BUFFER_KEY, JSON.stringify(buffer));
+    } catch (e) {
+        console.warn('[Buffer] Could not save to localStorage:', e);
+    }
+}
+
+function clearSessionBuffer() {
+    try {
+        localStorage.removeItem(SESSION_BUFFER_KEY);
+    } catch (e) { }
+}
+
+function isValidTeam() {
+    const name = (typeof currentTeam !== 'undefined' ? currentTeam : '').trim();
+    return name && name !== 'Unknown' && name !== 'NO TEAM' && name !== '';
+}
 
 async function submitToGoogleSheets(action, data = {}) {
     try {
@@ -21,83 +46,87 @@ async function submitToGoogleSheets(action, data = {}) {
             ...data
         };
 
-        // Add hint-specific data detail
         if (action.includes('HINT')) {
             payload.hintType = 'DECRYPTION_BASED';
             payload.hintPenaltyTime = currentPuzzle?.hintPenalty || 60;
             payload.hintDisplayed = typeof hintDisplayed !== 'undefined' ? hintDisplayed : false;
         }
 
-        // Add to queue with retry count
-        submissionQueue.push({ payload, retries: 0 });
+        // Skip entirely if no valid team (anonymous sessions)
+        if (!isValidTeam()) {
+            console.log('[Sheets] Skipping — no valid team');
+            return;
+        }
 
-        processSubmissionQueue();
+        // REGISTRATION: send immediately (critical first step)
+        if (action === 'REGISTRATION') {
+            sendToGoogleSheets(payload);
+            return;
+        }
+
+        // Everything else: buffer in localStorage, send later in batch
+        addToSessionBuffer(payload);
 
     } catch (error) {
         console.error('CRITICAL: Error queuing submission:', error);
     }
 }
 
-async function processSubmissionQueue() {
-    if (isSubmitting || submissionQueue.length === 0) return;
-
-    isSubmitting = true;
-
+async function sendToGoogleSheets(payload) {
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("SCRIPT_URL_HERE")) {
+        console.warn("[Sheets] URL missing. Cannot send.");
+        return;
+    }
     try {
-        while (submissionQueue.length > 0) {
-            // Peek at the first item
-            const currentItem = submissionQueue[0];
-
-            // Check for valid URL before attempting
-            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("SCRIPT_URL_HERE")) {
-                console.warn("Google Script URL is missing or invalid. Data cannot be synced.");
-                // Remove to prevent infinite loop
-                submissionQueue.shift();
-                continue;
-            }
-
-            try {
-                // Attempt to send
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // standard for Google Sheets Logging
-                    cache: 'no-cache',
-                    keepalive: true, // Crucial for data on unload
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8', // GAS prefers text/plain for no-cors
-                    },
-                    body: JSON.stringify(currentItem.payload)
-                });
-
-                // Assume success if no network error (no-cors is opaque)
-                console.log(`[Sync] Data submitted: ${currentItem.payload.action}`);
-                submissionQueue.shift(); // Remove on success
-
-            } catch (networkError) {
-                console.error('[Sync] Network error:', networkError);
-
-                currentItem.retries++;
-                if (currentItem.retries >= MAX_RETRIES) {
-                    console.error(`[Sync] Max retries reached for ${currentItem.payload.action}. Dropping.`);
-                    submissionQueue.shift(); // Give up
-                } else {
-                    console.log(`[Sync] Retrying... (${currentItem.retries}/${MAX_RETRIES})`);
-                    // Wait before retry
-                    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * currentItem.retries));
-                    break; // Break the while loop to retry in next cycle or after delay
-                }
-            }
-
-            // Small buffer between requests
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-    } catch (uncaughtError) {
-        console.error('[Sync] Queue processing error:', uncaughtError);
-    } finally {
-        isSubmitting = false;
-        // If queue not empty (e.g. paused due to error), try again slowly
-        if (submissionQueue.length > 0) {
-            setTimeout(processSubmissionQueue, 2000);
-        }
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            cache: 'no-cache',
+            keepalive: true,
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+        console.log(`[Sheets] Sent: ${payload.action}`);
+    } catch (e) {
+        console.warn(`[Sheets] Send failed for ${payload.action}:`, e);
     }
 }
+
+async function flushSessionBuffer() {
+    const buffer = getSessionBuffer();
+    if (buffer.length === 0) return;
+    if (!isValidTeam()) {
+        clearSessionBuffer();
+        return;
+    }
+    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("SCRIPT_URL_HERE")) {
+        console.warn("[Sheets] URL missing. Keeping buffer for later.");
+        return;
+    }
+
+    try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            cache: 'no-cache',
+            keepalive: true,
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'SESSION_BATCH', events: buffer, sessionId: sessionId })
+        });
+        console.log(`[Sheets] Flushed ${buffer.length} events`);
+        clearSessionBuffer();
+    } catch (e) {
+        console.warn('[Sheets] Flush failed, will retry later:', e);
+    }
+}
+
+// Auto-flush on page unload (sends whatever is buffered)
+window.addEventListener('beforeunload', () => {
+    if (isValidTeam()) {
+        const buffer = getSessionBuffer();
+        if (buffer.length > 0) {
+            sendToGoogleSheets({ action: 'SESSION_BATCH', events: buffer, sessionId: sessionId });
+            clearSessionBuffer();
+        }
+    }
+});

@@ -240,6 +240,9 @@ function submitPuzzleAnswer() {
                 if (trophyImg) trophyImg.src = 'images/poketropy.png';
             }
 
+            // Flush remaining events on game completion
+            setTimeout(() => flushSessionBuffer(), 100);
+
             // Trigger Grand Celebration
             setTimeout(() => triggerFinalCelebration(), 1500);
         } else {
@@ -265,6 +268,9 @@ function submitPuzzleAnswer() {
             team: currentTeam,
             answer: answer
         });
+
+        // Flush buffered events to Google Sheets
+        setTimeout(() => flushSessionBuffer(), 500);
     } else {
         playSound('error');
         showToast("DECRYPTION FAILED", "error");
