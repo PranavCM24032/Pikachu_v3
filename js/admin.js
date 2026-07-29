@@ -1,5 +1,5 @@
 const CONFIG = {
-    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyVekaNXe7WZ3bJafKehIJkIQ2NZal-CHCAxo5SNPO2Zuyv2BimgZg0MNb2_SY6YunO/exec',
+    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz-QywPm7vj2OAPuNt3xTTtpV0IbSsQcPiYkV3Ck22DuNDTMFZwRUvsusU3S0IOlGmB/exec',
     REFRESH_RATE: 5000,
     VERSION: '2.6.0'
 };
