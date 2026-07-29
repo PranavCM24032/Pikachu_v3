@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pykachu-hunt-v2';
+const CACHE_NAME = 'pykachu-hunt-v3';
 const ASSETS = [
     'admin.html',
     'index.html',
@@ -46,15 +46,29 @@ const ASSETS = [
     'assets/img/joy.png',
     'assets/img/oak.png',
     'assets/img/officer-jenny.png',
-    'assets/img/poketropy.png',
-    'logo.png'
+    'assets/img/poketropy.png'
 ];
 
 self.addEventListener('install', (event) => {
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(ASSETS);
         })
+    );
+});
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((name) => {
+                    if (name !== CACHE_NAME) {
+                        return caches.delete(name);
+                    }
+                })
+            );
+        }).then(() => self.clients.claim())
     );
 });
 

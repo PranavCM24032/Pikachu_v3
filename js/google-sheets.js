@@ -13,6 +13,7 @@ async function submitToGoogleSheets(action, data = {}) {
             action: action,
             sessionId: sessionId,
             teamName: currentTeam || 'Unknown',
+            tid: currentTeamTid || '',
             mission: typeof currentMissionLevel !== 'undefined' ? currentMissionLevel : '',
             language: currentLanguage || 'PYTHON',
             puzzleId: currentPuzzle?.id || 0,

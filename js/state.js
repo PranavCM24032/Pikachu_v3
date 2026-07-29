@@ -6,6 +6,7 @@ let TEAMS = [];
 // ==============================
 let currentPuzzle = null;
 let currentTeam = "";
+let currentTeamTid = "";
 let sessionId = "";
 let urlLockedPuzzle = null;
 let currentStep = 1;
@@ -52,6 +53,7 @@ let blurTimeout = null;
 function saveGameState() {
     const gameState = {
         currentTeam,
+        currentTeamTid,
         currentStep,
         currentPuzzleId: currentPuzzle?.id,
         tabSwitchCount,

@@ -37,6 +37,7 @@ document.getElementById('registrationForm').addEventListener('submit', function 
     }
 
     currentTeam = foundTeam.team;
+    currentTeamTid = foundTeam.tid || '';
     currentMissionLevel = missionLevel;
     currentLanguage = codeLanguage;
     resetHintForNewTeam();
@@ -48,6 +49,7 @@ document.getElementById('registrationForm').addEventListener('submit', function 
 
     localStorage.setItem(CONFIG.STORAGE_KEYS.teamInfo, JSON.stringify({
         name: currentTeam,
+        tid: currentTeamTid,
         missionLevel,
         language: currentLanguage,
         registeredAt: gameStartTime.toISOString(),
@@ -57,6 +59,7 @@ document.getElementById('registrationForm').addEventListener('submit', function 
 
     submitToGoogleSheets('REGISTRATION', {
         teamName: currentTeam,
+        tid: currentTeamTid,
         mission: missionLevel,
         language: currentLanguage
     });

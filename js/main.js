@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize with empty state for a fresh start
     currentTeam = "";
+    currentTeamTid = "";
     tabSwitchCount = 0;
     currentPuzzle = null;
     urlLockedPuzzle = null;
@@ -25,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const savedTeamInfo = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.teamInfo) || '{}');
         if (savedTeamInfo.language) currentLanguage = savedTeamInfo.language;
+        if (savedTeamInfo.tid) currentTeamTid = savedTeamInfo.tid;
     } catch (e) { }
 
     if (PUZZLES.length > 0) {
