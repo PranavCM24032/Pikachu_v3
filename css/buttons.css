@@ -41,6 +41,21 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
+#step1 .btn-pokedex {
+    min-height: 0;
+    min-width: 0;
+    padding: 6px 12px;
+    font-size: 10px;
+    border-bottom-width: 2px;
+}
+
+@media (min-width: 640px) {
+    #step1 .btn-pokedex {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+}
+
 @media (hover: none) and (pointer: coarse) {
     .btn-pokedex:hover {
         transform: none;

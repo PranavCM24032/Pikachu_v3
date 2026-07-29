@@ -9,16 +9,20 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    display: flex;
-    flex-direction: column;
     width: 100vw;
     height: 100vh;
     height: 100svh;
     max-width: 500px;
     margin: 0 auto;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
     padding: clamp(6px, 2vmin, 12px);
     z-index: 10;
+}
+
+.pokedex-shell::-webkit-scrollbar {
+    display: none;
 }
 
 .pokedex-shell::before {

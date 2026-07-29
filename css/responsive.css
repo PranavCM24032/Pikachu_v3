@@ -6,6 +6,10 @@
         border-radius: 12px;
         border-width: 3px;
     }
+
+    .pokedex-shell::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 @media (max-height: 700px) {
@@ -64,38 +68,39 @@
         padding: 4px !important;
     }
 
-    .flow-step.active {
-        overflow-y: auto;
-    }
-
     .btn-pokedex {
         padding: 6px 10px;
         font-size: 10px;
     }
 }
 
-@media (max-height: 600px) {
-    #step1 .flow-step > div {
+@media (max-height: 640px) {
+    #step1.flow-step > div {
         padding-top: 2px !important;
         padding-bottom: 2px !important;
     }
 
-    #step1 img[alt="Ash"] {
+    #step1.flow-step img[alt="Ash"] {
         display: none;
     }
 
-    #step1 .font-pixel {
-        font-size: 9px !important;
+    #step1.flow-step .font-pixel {
+        font-size: 8px !important;
     }
 
-    #step1 input,
-    #step1 select {
-        padding: 6px 10px !important;
-        font-size: 13px !important;
+    #step1.flow-step input,
+    #step1.flow-step select {
+        padding: 3px 6px !important;
+        font-size: 10px !important;
     }
 
-    #step1 .space-y-2 > :not([hidden]) ~ :not([hidden]) {
-        margin-top: 4px !important;
+    #step1.flow-step .space-y-1 > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 1px !important;
+    }
+
+    #step1.flow-step label {
+        margin-bottom: 1px !important;
+        font-size: 7px !important;
     }
 }
 

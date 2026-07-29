@@ -95,27 +95,6 @@
             }
         }
 
-        @keyframes scanline {
-            from {
-                transform: translateY(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            to {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-        }
-
-        .animate-scanline {
-            animation: scanline 2s linear infinite;
-        }
-
         @supports (padding-top: env(safe-area-inset-top)) {
             .pokedex-shell {
                 padding-top: max(env(safe-area-inset-top), 10px);
