@@ -1,4 +1,4 @@
-﻿.pokedex-shell {
+.pokedex-shell {
     background: linear-gradient(165deg, #e63946 0%, #c91f1f 40%, #a81a1a 100%);
     border-radius: clamp(12px, 3vw, 24px);
     border: clamp(4px, 1vw, 8px) solid #000;
@@ -9,16 +9,17 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    width: 100vw;
-    height: 100vh;
-    height: 100svh;
-    max-width: 500px;
-    margin: 0 auto;
-    overflow-y: auto;
+    /* Pokédex portrait dimensions — never wider than 460px, never taller than 100svh */
+    width: min(460px, 100vw - 8px);
+    height: min(820px, 100svh - 8px);
+    max-width: 460px;
+    margin: auto;
+    overflow-y: hidden;
     overflow-x: hidden;
     scrollbar-width: none;
     padding: clamp(6px, 2vmin, 12px);
     z-index: 10;
+    box-sizing: border-box;
 }
 
 .pokedex-shell::-webkit-scrollbar {

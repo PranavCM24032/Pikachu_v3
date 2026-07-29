@@ -1,8 +1,8 @@
-﻿@media (max-width: 640px) {
+@media (max-width: 640px) {
     .pokedex-shell {
-        width: calc(100vw - 4px);
-        height: calc(100svh - 4px);
-        margin: 2px;
+        width: calc(100vw - 8px);
+        height: calc(100svh - 8px);
+        margin: 4px auto;
         border-radius: 12px;
         border-width: 3px;
     }
@@ -124,8 +124,16 @@
 
 @supports (padding-top: env(safe-area-inset-top)) {
     .pokedex-shell {
-        padding-top: max(12px, env(safe-area-inset-top));
-        padding-bottom: max(12px, env(safe-area-inset-bottom));
+        padding-top: max(10px, env(safe-area-inset-top));
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+
+    @media (max-width: 640px) {
+        .pokedex-shell {
+            /* Ensure bottom edge always shows even on notched phones */
+            height: calc(100svh - max(8px, env(safe-area-inset-bottom)) - 8px);
+            margin-bottom: max(4px, env(safe-area-inset-bottom));
+        }
     }
 }
 
