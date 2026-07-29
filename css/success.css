@@ -1,0 +1,287 @@
+﻿.location-card-glow {
+    animation: location-glow 3s ease-in-out infinite;
+    background: rgba(245, 158, 11, 0.05) !important;
+    border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+@keyframes location-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.2), inset 0 0 5px rgba(245, 158, 11, 0.1);
+    }
+
+    50% {
+        box-shadow: 0 0 30px rgba(245, 158, 11, 0.4), inset 0 0 10px rgba(245, 158, 11, 0.2);
+    }
+}
+
+.progress-bar-fill {
+    animation: progress-fill 2s ease-out;
+}
+
+@keyframes progress-fill {
+    from {
+        width: 0%;
+    }
+
+    to {
+        width: 75%;
+    }
+}
+
+.map-grid-bg {
+    background-image:
+        linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+.pokemon-success-glow {
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 30px rgba(255, 215, 0, 0.4)) drop-shadow(0 0 45px rgba(255, 255, 255, 0.3));
+    animation: success-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes success-glow-pulse {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 30px rgba(255, 215, 0, 0.4)) drop-shadow(0 0 45px rgba(255, 255, 255, 0.3));
+        transform: scale(1) translateY(0);
+    }
+
+    50% {
+        filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.9)) drop-shadow(0 0 45px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 65px rgba(255, 255, 255, 0.5));
+        transform: scale(1.05) translateY(-15px);
+    }
+}
+
+.pokemon-platform {
+    position: absolute;
+    bottom: 15%;
+    width: clamp(100px, 20vh, 160px);
+    height: clamp(20px, 6vh, 45px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 500px;
+    z-index: 5;
+}
+
+.platform-ring {
+    position: absolute;
+    border-radius: 50%;
+    transform: rotateX(75deg);
+    border: 3px solid;
+    transition: all 0.3s ease;
+}
+
+.ring-blue {
+    width: 110%;
+    height: 110%;
+    border-color: #3b82f6;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.6), inset 0 0 10px rgba(59, 130, 246, 0.4);
+    animation: platform-impact 1.5s infinite;
+}
+
+.ring-yellow {
+    width: 75%;
+    height: 75%;
+    border-color: #eab308;
+    box-shadow: 0 0 20px rgba(234, 179, 8, 0.7), inset 0 0 12px rgba(234, 179, 8, 0.5);
+    animation: platform-impact 1.5s infinite 0.1s;
+}
+
+.ring-core {
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(circle, #fff 0%, #3b82f6 50%, transparent 100%);
+    border: none;
+    filter: blur(4px);
+    animation: core-glow 1.5s infinite;
+}
+
+@keyframes platform-impact {
+
+    0%,
+    100% {
+        transform: rotateX(75deg) scale(1.15);
+        filter: brightness(1.5);
+        opacity: 1;
+    }
+
+    50% {
+        transform: rotateX(75deg) scale(0.95);
+        filter: brightness(1);
+        opacity: 0.6;
+    }
+}
+
+@keyframes core-glow {
+
+    0%,
+    100% {
+        transform: rotateX(75deg) scale(1.5);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: rotateX(75deg) scale(1);
+        opacity: 0.3;
+    }
+}
+
+.pokemon-success-glow {
+    filter: drop-shadow(0 0 15px rgba(234, 179, 8, 0.8)) drop-shadow(0 0 30px rgba(255, 215, 0, 0.4));
+    animation: pokemon-bounce-vertical 1.5s infinite ease-in-out;
+    transform-origin: bottom center;
+    margin-bottom: -10px;
+}
+
+@keyframes pokemon-bounce-vertical {
+
+    0%,
+    100% {
+        transform: translateY(0) scaleX(1.05) scaleY(0.95);
+    }
+
+    50% {
+        transform: translateY(-45px) scaleX(0.98) scaleY(1.02);
+    }
+}
+.perfect-sparkle {
+    position: absolute;
+    pointer-events: none;
+    background: white;
+    border-radius: 50%;
+    z-index: 5;
+}
+
+.sparkle-gold {
+    background: radial-gradient(circle, #fff 0%, #ffd700 100%);
+    box-shadow: 0 0 10px #ffd700;
+}
+
+.sparkle-white {
+    background: radial-gradient(circle, #fff 0%, #e0e0e0 100%);
+    box-shadow: 0 0 10px #fff;
+}
+
+.sparkle-blue {
+    background: radial-gradient(circle, #fff 0%, #60a5fa 100%);
+    box-shadow: 0 0 10px #60a5fa;
+}
+
+.sparkle-purple {
+    background: radial-gradient(circle, #fff 0%, #a855f7 100%);
+    box-shadow: 0 0 10px #a855f7;
+}
+
+@keyframes sparkle-twinkle {
+
+    0%,
+    100% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.2) rotate(180deg);
+        opacity: 1;
+    }
+}
+
+.animate-twinkle {
+    animation: sparkle-twinkle 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+.gym-badge-container {
+    perspective: 1000px;
+    filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.3));
+    animation: badge-float 3s ease-in-out infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.gym-badge-image {
+    width: clamp(70px, 18vh, 100px);
+    height: clamp(70px, 18vh, 100px);
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+    animation: badge-shine 4s ease-in-out infinite;
+    z-index: 10;
+}
+
+@keyframes badge-float {
+
+    0%,
+    100% {
+        transform: translateY(0) rotateZ(0deg);
+    }
+
+    50% {
+        transform: translateY(-12px) rotateZ(5deg);
+    }
+}
+
+@keyframes badge-shine {
+
+    0%,
+    100% {
+        filter: brightness(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+        transform: scale(1);
+    }
+
+    50% {
+        filter: brightness(1.2) drop-shadow(0 0 20px rgba(59, 130, 246, 0.8));
+        transform: scale(1.05);
+    }
+}
+
+.badge-sparkle {
+    position: absolute;
+    width: 130px;
+    height: 130px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: sparkle-rotate 10s linear infinite;
+    z-index: 1;
+}
+
+@keyframes sparkle-rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

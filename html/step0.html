@@ -1,0 +1,49 @@
+<div id="step0" class="flow-step active h-full">
+    <div class="flex flex-col h-full justify-center items-center p-3 sm:p-4 md:p-6 text-center">
+
+        <h2 class="font-pixel text-blue-400 mb-2 tracking-widest uppercase text-sm sm:text-base">
+            Mission Protocol
+        </h2>
+
+        <!-- Briefing Layout -->
+        <div class="briefing-container">
+            <div class="rules-board blackboard w-full mx-auto">
+                <p class="text-[10px] sm:text-[12px] leading-relaxed text-left space-y-3">
+                    <span class="rules-title block mb-2 uppercase font-bold text-center pb-1">Oak's
+                        Master Rules</span>
+                    <span class="flex items-start gap-2">
+                        <span class="chalk-bullet">1.</span>
+                        <span>No tab switching. (Jenny's watching!)</span>
+                    </span>
+                    <span class="flex items-start gap-2">
+                        <span class="chalk-bullet">2.</span>
+                        <span>Hints cost processing time.</span>
+                    </span>
+                    <span class="flex items-start gap-2">
+                        <span class="chalk-bullet">3.</span>
+                        <span>Keys are confidential.</span>
+                    </span>
+                    <span class="flex items-start gap-2">
+                        <span class="chalk-bullet">4.</span>
+                        <span>Stay in mission sector.</span>
+                    </span>
+                    <span class="flex items-start gap-2 text-blue-300">
+                        <span class="chalk-bullet">5.</span>
+                        <span class="animate-pulse">Install App for full security!</span>
+                    </span>
+                </p>
+            </div>
+
+            <!-- Overlapping Professor Oak -->
+            <div class="oak-overlap">
+                <img src="assets/img/oak.png" alt="Professor Oak">
+            </div>
+        </div>
+
+        <button onclick="acceptRules()" onmousedown="playSound('powerUp')"
+            class="btn-pokedex w-full max-w-xs flex items-center justify-center gap-2 py-3 sm:py-4 text-sm sm:text-base">
+            <span class="material-symbols-rounded">check_circle</span>
+            I'M READY, PROFESSOR!
+        </button>
+    </div>
+</div>

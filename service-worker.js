@@ -1,0 +1,67 @@
+const CACHE_NAME = 'pykachu-hunt-v2';
+const ASSETS = [
+    'admin.html',
+    'index.html',
+    'css/base.css',
+    'css/shell.css',
+    'css/buttons.css',
+    'css/components.css',
+    'css/terminal.css',
+    'css/overlays.css',
+    'css/animations.css',
+    'css/success.css',
+    'css/responsive.css',
+    'css/admin.css',
+    'css/security.css',
+    'js/config.js',
+    'js/state.js',
+    'js/audio.js',
+    'js/data-loader.js',
+    'js/google-sheets.js',
+    'js/ui.js',
+    'js/screens.js',
+    'js/scanner.js',
+    'js/penalty.js',
+    'js/hint.js',
+    'js/game.js',
+    'js/main.js',
+    'js/admin.js',
+    'js/security.js',
+    'js/include.js',
+    'html/step0.html',
+    'html/step1.html',
+    'html/step2.html',
+    'html/step3.html',
+    'html/step4.html',
+    'html/step5.html',
+    'html/overlays.html',
+    'data/puzzle.json',
+    'data/teams.json',
+    'service-worker.js',
+    'assets/img/ash.png',
+    'assets/img/ash-2.png',
+    'assets/img/ash-3.png',
+    'assets/img/brock.png',
+    'assets/img/jenny.png',
+    'assets/img/joy.png',
+    'assets/img/oak.png',
+    'assets/img/officer-jenny.png',
+    'assets/img/poketropy.png',
+    'logo.png'
+];
+
+self.addEventListener('install', (event) => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(ASSETS);
+        })
+    );
+});
+
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        caches.match(event.request).then((response) => {
+            return response || fetch(event.request);
+        })
+    );
+});

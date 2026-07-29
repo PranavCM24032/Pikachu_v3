@@ -1,0 +1,295 @@
+// ==============================
+// GAME FLOW FUNCTIONS
+// ==============================
+function showStep(stepNumber) {
+    console.log('Showing step:', stepNumber);
+
+    const steps = document.querySelectorAll('.flow-step');
+    const targetStep = document.getElementById(`step${stepNumber}`);
+
+    if (!targetStep) return;
+
+    // Smooth Transition
+    steps.forEach(step => {
+        if (step.classList.contains('active')) {
+            step.style.opacity = '0';
+            step.style.transform = 'translateY(-10px)';
+            step.style.transition = 'all 0.3s ease';
+            setTimeout(() => step.classList.remove('active'), 300);
+        }
+    });
+
+    setTimeout(() => {
+        targetStep.classList.add('active');
+        targetStep.style.opacity = '0';
+        targetStep.style.transform = 'translateY(10px)';
+        targetStep.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+
+        // Trigger reflow
+        targetStep.offsetHeight;
+
+        targetStep.style.opacity = '1';
+        targetStep.style.transform = 'translateY(0)';
+    }, 310);
+
+    currentStep = stepNumber;
+
+    // Update team name display across steps
+    const teamDisplays = ['teamNameDisplay', 'step4TeamName'];
+    teamDisplays.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = currentTeam || 'NO TEAM';
+    });
+
+    if (stepNumber === 3) {
+        const badgeContainer = document.getElementById('step3BadgeContainer');
+        const badgeImg = document.getElementById('gymBadgeImg');
+        const nextPuzzleIdDisplay = document.getElementById('nextPuzzleIdDisplay');
+        const unlockCodeInput = document.getElementById('unlockCode');
+
+        if (urlLockedPuzzle) {
+            // Gym Badge Integration: Fetch from PokeAPI sprites via GitHub
+            // Note: github.com blob URLs don't work in <img> src, so we use raw.githubusercontent.com
+            const badgeId = urlLockedPuzzle.id;
+            const badgeUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/badges/${badgeId}.png`;
+
+            if (badgeImg) {
+                badgeImg.src = badgeUrl;
+                if (badgeContainer) {
+                    badgeContainer.classList.remove('hidden');
+                }
+            }
+            if (nextPuzzleIdDisplay) {
+                nextPuzzleIdDisplay.textContent = '';
+            }
+        } else {
+            if (badgeContainer) badgeContainer.classList.add('hidden');
+        }
+
+        if (unlockCodeInput) {
+            unlockCodeInput.value = '';
+            setTimeout(() => {
+                unlockCodeInput.focus();
+            }, 600);
+        }
+    }
+
+    if (stepNumber === 4) {
+        isPuzzleActive = true;
+        startTabMonitoring();
+
+        // Add mild green glow effect to code container (similar to location clue but green)
+        const codeTerminal = document.querySelector('.code-terminal');
+        if (codeTerminal) {
+            codeTerminal.style.boxShadow =
+                '0 0 10px rgba(0, 245, 160, 0.2), ' +
+                '0 0 20px rgba(0, 245, 160, 0.1), ' +
+                '0 0 30px rgba(0, 245, 160, 0.05)';
+            codeTerminal.style.borderColor = 'rgba(0, 245, 160, 0.4)';
+            codeTerminal.style.transition = 'box-shadow 0.5s ease, border-color 0.5s ease';
+        }
+
+        // Update language badge
+        const langBadge = document.getElementById('langBadge');
+        if (langBadge) {
+            langBadge.textContent = currentLanguage === 'CPP' ? 'C++' : 'PYTHON';
+        }
+
+        // Focus on answer input
+        setTimeout(() => {
+            const answerInput = document.getElementById('puzzleAnswer');
+            if (answerInput) {
+                answerInput.focus();
+                answerInput.value = ''; // Clear previous answer
+            }
+        }, 100);
+
+        // Setup hint system
+        setTimeout(() => {
+            setupHintSystem();
+        }, 100);
+
+        // Start Timer
+        if (!gameStartTime) {
+            gameStartTime = new Date();
+        }
+        startPuzzleTimer();
+
+        // Ensure puzzle is displayed
+        if (currentPuzzle) {
+            const puzzleQuestion = document.getElementById('puzzleQuestion');
+            if (puzzleQuestion) {
+                puzzleQuestion.textContent = getPuzzleQuestion(currentPuzzle);
+            }
+
+            // Show CSS Pokeball
+            const pokeball = document.getElementById('step4Pokeball');
+            if (pokeball) {
+                pokeball.classList.remove('hidden');
+            }
+        }
+    } else {
+        isPuzzleActive = false;
+        stopTabMonitoring();
+
+        // Remove green glow effect
+        const codeTerminal = document.querySelector('.code-terminal');
+        if (codeTerminal) {
+            codeTerminal.style.boxShadow = '';
+            codeTerminal.style.borderColor = '';
+            codeTerminal.style.transition = '';
+        }
+
+        // Stop Timer
+        if (puzzleTimerInterval) {
+            clearInterval(puzzleTimerInterval);
+            puzzleTimerInterval = null;
+        }
+
+        // Clean up hint system
+        if (hintPenaltyActive) {
+            cleanupHintSystem();
+        }
+    }
+
+    saveGameState();
+}
+
+function updateTeamStatus() {
+    const teamDisplays = ['teamNameInput', 'teamNameDisplay', 'step4TeamName'];
+    const hasTeam = currentTeam && currentTeam.trim() !== "";
+    const displayName = hasTeam ?
+        (currentTeam.length > 20 ? currentTeam.substring(0, 20) + '...' : currentTeam) :
+        'NO TEAM';
+
+    teamDisplays.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.textContent = displayName;
+        }
+    });
+
+    // Update LVL and TYPE indicators
+    const lvlEl = document.getElementById('teamLevelDisplay');
+    const typeEl = document.getElementById('teamTypeDisplay');
+
+    // Status Item Wrappers
+    const lvlWrapper = document.getElementById('statusLvl');
+    const teamWrapper = document.getElementById('statusTeam');
+    const typeWrapper = document.getElementById('statusType');
+
+    if (hasTeam && currentMissionLevel) {
+        // Parse missionLevel like "L1_GRASS"
+        const parts = currentMissionLevel.split('_');
+        const lvl = (parts[0] || "L1").replace('L', '').padStart(2, '0');
+        const type = parts[1] || "NORMAL";
+
+        if (lvlEl) lvlEl.textContent = lvl;
+        if (typeEl) typeEl.textContent = type;
+
+        // Transition to Green (Filled)
+        [lvlWrapper, teamWrapper, typeWrapper].forEach(w => {
+            if (w) {
+                w.classList.remove('is-empty');
+                w.classList.add('is-filled');
+            }
+        });
+
+        // Update Team Icon to active version
+        const teamIcon = teamWrapper?.querySelector('.material-symbols-rounded');
+        if (teamIcon) teamIcon.textContent = 'verified_user';
+    } else {
+        if (lvlEl) lvlEl.textContent = "00";
+        if (typeEl) typeEl.textContent = "SYSTEM";
+
+        // Revert to Red (Empty)
+        [lvlWrapper, teamWrapper, typeWrapper].forEach(w => {
+            if (w) {
+                w.classList.remove('is-filled');
+                w.classList.add('is-empty');
+            }
+        });
+
+        // Reset Team Icon
+        const teamIcon = teamWrapper?.querySelector('.material-symbols-rounded');
+        if (teamIcon) teamIcon.textContent = 'shield_person';
+    }
+}
+
+// ==============================
+// 1. PERFORMANCE & SCHEDULING SYSTEM
+// ==============================
+const Scheduler = {
+    timers: new Map(),
+
+    // Smooth Timer using requestAnimationFrame
+    startSmoothTimer(id, callback) {
+        if (this.timers.has(id)) this.stopTimer(id);
+        let lastTime = performance.now();
+        const loop = (currentTime) => {
+            if (currentTime - lastTime >= 1000) {
+                callback();
+                lastTime = currentTime;
+            }
+            this.timers.set(id, requestAnimationFrame(loop));
+        };
+        this.timers.set(id, requestAnimationFrame(loop));
+    },
+
+    stopTimer(id) {
+        if (this.timers.has(id)) {
+            cancelAnimationFrame(this.timers.get(id));
+            this.timers.delete(id);
+        }
+    }
+};
+
+function startPuzzleTimer() {
+    Scheduler.startSmoothTimer('puzzleTimer', updatePuzzleTimer);
+}
+
+function updatePuzzleTimer() {
+    const timerElement = document.getElementById('puzzleTimer');
+    if (!timerElement || !gameStartTime) return;
+
+    const diff = Math.floor((new Date() - gameStartTime) / 1000);
+    const mins = Math.floor(diff / 60).toString().padStart(2, '0');
+    const secs = (diff % 60).toString().padStart(2, '0');
+    timerElement.textContent = `${mins}:${secs}`;
+}
+
+// ==============================
+// MANUAL ENTRY HANDLERS
+// ==============================
+function showManualEntry() {
+    const container = document.getElementById('manualEntryContainer');
+    if (container) {
+        container.classList.remove('hidden');
+        document.getElementById('manualSignalId')?.focus();
+    }
+}
+
+function hideManualEntry() {
+    const container = document.getElementById('manualEntryContainer');
+    if (container) {
+        container.classList.add('hidden');
+    }
+}
+
+function submitManualEntry() {
+    const input = document.getElementById('manualSignalId');
+    if (!input) return;
+
+    const signalId = input.value.trim().toUpperCase();
+    if (!signalId) {
+        showToast('Enter a valid Signal ID', 'error');
+        return;
+    }
+
+    console.log('Manual Signal Entry:', signalId);
+    handleQRScanResult(signalId);
+
+    // Reset and close
+    input.value = '';
+    hideManualEntry();
+}

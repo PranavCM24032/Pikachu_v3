@@ -1,0 +1,295 @@
+﻿.pokedex-shell {
+    background: linear-gradient(165deg, #e63946 0%, #c91f1f 40%, #a81a1a 100%);
+    border-radius: clamp(12px, 3vw, 24px);
+    border: clamp(4px, 1vw, 8px) solid #000;
+    box-shadow:
+        inset 0 4px 12px rgba(255, 255, 255, 0.2),
+        inset 0 -10px 20px rgba(0, 0, 0, 0.5),
+        0 10px 30px rgba(0, 0, 0, 0.4);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    height: 100svh;
+    max-width: 500px;
+    margin: 0 auto;
+    overflow: hidden;
+    padding: clamp(6px, 2vmin, 12px);
+    z-index: 10;
+}
+
+.pokedex-shell::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: clamp(30px, 8vmin, 60px);
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 40%,
+            transparent 100%);
+    border-radius: inherit;
+    z-index: 1;
+}
+
+.pokedex-lens {
+    position: relative;
+    width: clamp(28px, 8vmin, 40px);
+    height: clamp(28px, 8vmin, 40px);
+    background: radial-gradient(circle at 30% 30%,
+            #93c5fd 0%,
+            #60a5fa 40%,
+            #3b82f6 100%);
+    border-radius: 50%;
+    border: clamp(2px, 0.5vmin, 4px) solid white;
+    box-shadow:
+        inset 0 -4px 8px rgba(0, 0, 0, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        0 4px 8px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(59, 130, 246, 0.6);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.pokedex-lens::before {
+    content: '';
+    position: absolute;
+    top: clamp(1px, 0.3vmin, 2px);
+    left: clamp(1px, 0.3vmin, 2px);
+    width: clamp(6px, 2vmin, 12px);
+    height: clamp(6px, 2vmin, 12px);
+    background: radial-gradient(circle at 30% 30%,
+            rgba(255, 255, 255, 0.9) 0%,
+            rgba(255, 255, 255, 0.6) 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+    z-index: 2;
+}
+
+.pokedex-lens::after {
+    content: '';
+    position: absolute;
+    top: clamp(0.5px, 0.2vmin, 1px);
+    right: clamp(1px, 0.3vmin, 2px);
+    width: clamp(4px, 1.5vmin, 10px);
+    height: clamp(4px, 1.5vmin, 10px);
+    background: radial-gradient(circle at 70% 30%,
+            rgba(255, 255, 255, 0.5) 0%,
+            rgba(255, 255, 255, 0.2) 100%);
+    border-radius: 50%;
+    filter: blur(0.5px);
+    z-index: 1;
+}
+
+.pokedex-lens .inner-ring {
+    position: absolute;
+    top: clamp(4px, 1.5vmin, 8px);
+    left: clamp(4px, 1.5vmin, 8px);
+    right: clamp(4px, 1.5vmin, 8px);
+    bottom: clamp(4px, 1.5vmin, 8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    box-shadow:
+        inset 0 2px 4px rgba(255, 255, 255, 0.2),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes lens-pulse {
+
+    0%,
+    100% {
+        opacity: 0.9;
+        transform: scale(1);
+        box-shadow:
+            inset 0 -4px 8px rgba(0, 0, 0, 0.4),
+            inset 0 2px 4px rgba(255, 255, 255, 0.3),
+            0 4px 8px rgba(0, 0, 0, 0.3),
+            0 0 20px rgba(59, 130, 246, 0.6);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.03);
+        box-shadow:
+            inset 0 -4px 8px rgba(0, 0, 0, 0.4),
+            inset 0 2px 4px rgba(255, 255, 255, 0.4),
+            0 6px 12px rgba(0, 0, 0, 0.4),
+            0 0 25px rgba(59, 130, 246, 0.8);
+    }
+}
+
+.lens-pulse {
+    animation: lens-pulse 2s infinite ease-in-out;
+}
+.crt-container {
+    flex: 1;
+    min-height: 0;
+    margin: clamp(4px, 1vh, 10px);
+    background: #080808;
+    border-radius: clamp(10px, 2vh, 18px);
+    border: clamp(2px, 0.5vmin, 4px) solid #151515;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow:
+        inset 0 10px 30px rgba(0, 0, 0, 0.9),
+        inset 0 -5px 15px rgba(255, 255, 255, 0.03),
+        0 4px 15px rgba(0, 0, 0, 0.6);
+}
+
+.crt-screen {
+    flex: 1;
+    min-height: 0;
+    background: linear-gradient(180deg, #1a2a3a 0%, #0c111b 100%);
+    margin: clamp(1px, 0.3vh, 2px);
+    border-radius: clamp(4px, 1vh, 8px);
+    overflow-y: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--inner-padding) var(--inner-padding) var(--inner-padding);
+    padding-top: 0;
+    box-shadow:
+        inset 0 0 40px rgba(0, 0, 0, 0.9),
+        0 0 0 2px rgba(255, 255, 255, 0.05);
+    z-index: 5;
+}
+
+.crt-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.4) 100%),
+        repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.05) 0px, rgba(0, 0, 0, 0.05) 1px, transparent 1px, transparent 2px),
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.12) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+    background-size: 100% 6px, 3px 100%;
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.crt-screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(18, 16, 16, 0.03);
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+    animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+    0% {
+        opacity: 0.02;
+    }
+
+    50% {
+        opacity: 0.01;
+    }
+
+    100% {
+        opacity: 0.02;
+    }
+}
+
+.crt-screen::-webkit-scrollbar {
+    width: 4px;
+}
+
+.crt-screen::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+}
+
+.crt-screen::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.4);
+    border-radius: 2px;
+}
+
+.crt-screen::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.6);
+}
+.status-light {
+    width: clamp(8px, 2vmin, 12px);
+    height: clamp(8px, 2vmin, 12px);
+    border-radius: 50%;
+    border: 1.5px solid rgba(0, 0, 0, 0.3);
+    box-shadow:
+        inset 0 0 6px rgba(255, 255, 255, 0.25),
+        0 0 6px currentColor;
+}
+.gameboy-screen {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.45);
+    background: linear-gradient(180deg, rgba(165, 214, 167, 0.95) 0%, rgba(200, 230, 201, 0.95) 60%),
+        linear-gradient(135deg, #a5d6a7 0%, #c8e6c9 100%);
+    box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 -6px 18px rgba(255, 255, 255, 0.03),
+        0 8px 30px rgba(0, 0, 0, 0.5);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    width: 100%;
+    height: 100%;
+}
+
+.gameboy-screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 25%),
+        radial-gradient(ellipse at center, rgba(0, 0, 0, 0.12), transparent 60%);
+    mix-blend-mode: overlay;
+}
+
+.gameboy-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(0deg,
+            rgba(0, 0, 0, 0.05) 0px,
+            rgba(0, 0, 0, 0.05) 1px,
+            transparent 1px,
+            transparent 2px);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.scanlines::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.07) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.pokedex-shell::after {
+    content: '';
+    position: absolute;
+    bottom: 40px;
+    right: 20px;
+    width: 60px;
+    height: 100px;
+    background: repeating-linear-gradient(0deg,
+            rgba(0, 0, 0, 0.1) 0px,
+            rgba(0, 0, 0, 0.1) 2px,
+            transparent 2px,
+            transparent 6px);
+    pointer-events: none;
+    opacity: 0.3;
+}

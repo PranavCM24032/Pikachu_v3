@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         requestCameraPermission();
-        myWebView.loadUrl("file:///android_asset/player.html");
+        myWebView.loadUrl("file:///android_asset/index.html");
     }
 
     private void requestCameraPermission() {

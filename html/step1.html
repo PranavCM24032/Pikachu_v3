@@ -1,0 +1,127 @@
+<div id="step1" class="flow-step h-full">
+    <div class="flex flex-col h-full justify-center items-center p-3 sm:p-4 md:p-6">
+        <div class="text-center w-full mb-4 sm:mb-6 shrink-0">
+            <h2
+                class="font-pixel text-blue-400 mb-1 sm:mb-1.5 tracking-widest uppercase text-sm sm:text-base">
+                Trainer Identification
+            </h2>
+            <p class="text-gray-400 mb-3 sm:mb-4 text-xs sm:text-sm">Sync Kanto Network</p>
+
+            <div class="relative flex justify-center mx-auto mb-4 sm:mb-6">
+                <div class="absolute inset-0 bg-blue-600/20 rounded-full blur-xl animate-pulse"></div>
+                <div
+                    class="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-900 rounded-full flex items-center justify-center border-2 border-blue-500/20">
+                    <!-- Image with padding -->
+                    <div class="p-2 sm:p-3 md:p-4 w-full h-full">
+                        <img src="assets/img/ash-3.png" alt="Ash"
+                            class="w-full h-full rounded-full object-cover filter brightness-90" />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <form id="registrationForm" class="w-full max-w-xs sm:max-w-sm space-y-3 sm:space-y-4">
+            <div>
+                <label
+                    class="block text-gray-500 uppercase tracking-widest mb-1.5 ml-1 font-bold text-xs sm:text-sm">
+                    Team Name
+                </label>
+                <div class="relative">
+                    <input type="text" id="teamName"
+                        class="w-full bg-black/40 border-2 border-slate-800 rounded-xl px-4 py-3 sm:py-4 text-white focus:border-blue-500 focus:outline-none placeholder-gray-600 uppercase transition-all text-sm sm:text-base"
+                        placeholder="TRAINER NAME" autocomplete="off" required
+                        autocapitalize="characters">
+                    <span
+                        class="material-symbols-rounded absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg sm:text-xl">
+                        badge
+                    </span>
+                </div>
+            </div>
+
+            <div>
+                <label
+                    class="block text-gray-500 uppercase tracking-widest mb-1.5 ml-1 font-bold text-xs sm:text-sm">
+                    Security Key
+                </label>
+                <div class="relative">
+                    <input type="password" id="teamPassword"
+                        class="w-full bg-black/40 border-2 border-slate-800 rounded-xl px-4 py-3 sm:py-4 text-white focus:border-blue-500 focus:outline-none placeholder-gray-600 transition-all font-mono text-sm sm:text-base"
+                        placeholder="••••" autocomplete="off" required>
+                    <button type="button" onclick="togglePasswordVisibility()"
+                        onmousedown="playSound('click')"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-400 transition-colors focus:outline-none">
+                        <span id="passwordToggleIcon"
+                            class="material-symbols-rounded text-lg sm:text-xl">
+                            visibility_off
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <label
+                    class="block text-gray-500 uppercase tracking-widest mb-1.5 ml-1 font-bold text-xs sm:text-sm">
+                    Language
+                </label>
+                <div class="relative group">
+                    <select id="codeLanguage"
+                        class="w-full bg-black/40 border-2 border-slate-800 rounded-xl px-4 py-3 sm:py-4 text-white focus:border-blue-500 focus:outline-none appearance-none cursor-pointer transition-all hover:border-blue-500/50 text-sm sm:text-base">
+                        <option value="PYTHON" class="bg-[#050810] text-gray-300">🐍 PYTHON</option>
+                        <option value="CPP" class="bg-[#050810] text-gray-300">⚡ C++</option>
+                    </select>
+                    <span
+                        class="material-symbols-rounded absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none group-hover:text-blue-400 transition-colors text-lg sm:text-xl">
+                        code
+                    </span>
+                </div>
+            </div>
+
+            <div>
+                <label
+                    class="block text-gray-500 uppercase tracking-widest mb-1.5 ml-1 font-bold text-xs sm:text-sm">
+                    Mission Discovery
+                </label>
+                <div class="relative group">
+                    <select id="missionLevel"
+                        class="w-full bg-black/40 border-2 border-slate-800 rounded-xl px-4 py-3 sm:py-4 text-white focus:border-blue-500 focus:outline-none appearance-none cursor-pointer transition-all hover:border-blue-500/50 text-sm sm:text-base">
+                        <optgroup label="LEVEL 1: ELEMENTAL" class="bg-[#0a0f1d] text-blue-400">
+                            <option value="L1_GRASS" class="bg-[#050810] text-gray-300">🌿 GRASS SECTOR
+                            </option>
+                            <option value="L1_FIRE" class="bg-[#050810] text-gray-300">🔥 FIRE SECTOR
+                            </option>
+                            <option value="L1_WATER" class="bg-[#050810] text-gray-300">💧 WATER SECTOR
+                            </option>
+                            <option value="L1_GROUND" class="bg-[#050810] text-gray-300">🌍 GROUND
+                                SECTOR</option>
+                        </optgroup>
+                        <optgroup label="LEVEL 2: ELITE" class="bg-[#0a0f1d] text-yellow-500">
+                            <option value="L2_CHARIZARD" class="bg-[#050810] text-gray-300">🐲 CHARIZARD
+                                ASCENT</option>
+                            <option value="L2_GRENINJA" class="bg-[#050810] text-gray-300">🐸 GRENINJA
+                                STRIKE</option>
+                        </optgroup>
+                        <optgroup label="LEVEL 3: ULTIMATE" class="bg-[#0a0f1d] text-red-500">
+                            <option value="L3_PIKACHU" class="bg-[#050810] text-gray-300">⚡ PIKACHU HUNT
+                            </option>
+                        </optgroup>
+                    </select>
+                    <span
+                        class="material-symbols-rounded absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none group-hover:text-blue-400 transition-colors text-lg sm:text-xl">
+                        expand_more
+                    </span>
+                </div>
+            </div>
+
+            <div id="registrationFeedback"
+                class="hidden text-xs sm:text-sm p-3 rounded-xl mb-3 bg-red-900/20 border border-red-900/40 text-red-100 font-pixel">
+            </div>
+
+            <button type="submit" onmousedown="playSound('powerUp')"
+                class="btn-pokedex w-full flex items-center justify-center gap-2 sm:gap-3 py-3 sm:py-4 text-sm sm:text-base">
+                <span class="material-symbols-rounded text-lg sm:text-xl">play_arrow</span>
+                START HUNT
+            </button>
+        </form>
+    </div>
+</div>

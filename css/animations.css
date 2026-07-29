@@ -1,0 +1,252 @@
+﻿@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-5px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(5px);
+    }
+}
+
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
+@keyframes bounce-center {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+.animate-spin-slow {
+    animation: spin 10s linear infinite;
+}
+
+.premium-glow {
+    box-shadow:
+        0 0 30px rgba(59, 130, 246, 0.5),
+        inset 0 0 20px rgba(59, 130, 246, 0.3),
+        0 0 60px rgba(59, 130, 246, 0.2);
+    animation: glow-pulse 2s ease-in-out infinite, crt-flicker 0.15s infinite;
+}
+
+@keyframes glow-pulse {
+
+    0%,
+    100% {
+        filter: brightness(1.1) drop-shadow(0 0 10px rgba(59, 130, 246, 0.6));
+    }
+
+    50% {
+        filter: brightness(1.4) drop-shadow(0 0 25px rgba(59, 130, 246, 0.8));
+    }
+}
+
+@keyframes crt-flicker {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.98;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+.gemini-shine {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: white;
+    clip-path: polygon(50% 0%, 63% 37%, 100% 50%, 63% 63%, 50% 100%, 37% 63%, 0% 50%, 37% 37%);
+    filter: drop-shadow(0 0 5px white);
+    animation: gemini-blink 4s infinite ease-in-out;
+    pointer-events: none;
+    z-index: 25;
+    opacity: 0;
+}
+
+@keyframes gemini-blink {
+
+    0%,
+    100% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+
+    10%,
+    30% {
+        transform: scale(1) rotate(90deg);
+        opacity: 1;
+        filter: drop-shadow(0 0 8px white) brightness(1.5);
+    }
+
+    40%,
+    90% {
+        transform: scale(0) rotate(180deg);
+        opacity: 0;
+    }
+}
+
+.shine-1 {
+    top: -10%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.shine-2 {
+    top: 20%;
+    right: -5%;
+    animation-delay: 1.2s;
+}
+
+.shine-3 {
+    bottom: 10%;
+    left: -10%;
+    animation-delay: 2.5s;
+    width: 8px;
+    height: 8px;
+}
+
+.shine-4 {
+    top: 60%;
+    left: 110%;
+    animation-delay: 0.8s;
+}
+
+.shine-5 {
+    top: -5%;
+    right: 20%;
+    animation-delay: 3.1s;
+    width: 6px;
+    height: 6px;
+}
+
+.shine-6 {
+    bottom: -10%;
+    right: 10%;
+    animation-delay: 1.8s;
+}
+
+.cyber-pokeball .pixel-pokeball {
+    opacity: 0.8;
+    filter: grayscale(0.5) contrast(1.2);
+}
+
+.glitch-active {
+    animation: glitch-frames 0.2s steps(2) infinite;
+}
+
+@keyframes glitch-frames {
+    0% {
+        transform: translate(0);
+        clip-path: inset(0 0 0 0);
+    }
+
+    50% {
+        transform: translate(-2px, 1px);
+        clip-path: inset(10% 0 40% 0);
+    }
+
+    100% {
+        transform: translate(2px, -1px);
+        clip-path: inset(50% 0 10% 0);
+    }
+}
+
+.sparkle {
+    position: absolute;
+    color: var(--poke-yellow);
+    pointer-events: none;
+    z-index: 20;
+    font-size: clamp(14px, 4vw, 24px);
+    text-shadow: 0 0 10px rgba(255, 214, 51, 0.8);
+}
+
+@keyframes sparkle-float {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 0;
+    }
+
+    50% {
+        transform: translate(0, -15px) scale(1.2) rotate(45deg);
+        opacity: 1;
+    }
+}
+
+@keyframes twinkle {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 1;
+        filter: brightness(1.5) blur(2px);
+    }
+}
+
+@keyframes sparkle-ping {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}

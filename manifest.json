@@ -1,6 +1,6 @@
 {
-    "name": "Pikachu Hunt",
-    "short_name": "PikachuHunt",
+    "name": "Pykachu Hunt",
+    "short_name": "PykachuHunt",
     "description": "Premium Pokémon Binary Signal Decryption Hunt",
     "start_url": "index.html",
     "display": "standalone",

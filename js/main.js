@@ -1,0 +1,339 @@
+// ==============================
+// INITIALIZATION
+// ==============================
+document.addEventListener('DOMContentLoaded', async () => {
+    // Sessions are now persistent for a better user experience
+    // localStorage.removeItem(CONFIG.STORAGE_KEYS.gameState); 
+    // localStorage.removeItem(CONFIG.STORAGE_KEYS.teamInfo); 
+
+    await loadPuzzles();
+    await loadTeams();
+    initAudio();
+
+    if (!sessionId) {
+        sessionId = generateSessionId();
+    }
+
+    // Initialize with empty state for a fresh start
+    currentTeam = "";
+    tabSwitchCount = 0;
+    currentPuzzle = null;
+    urlLockedPuzzle = null;
+    currentLanguage = "PYTHON";
+
+    // Restore language from saved session
+    try {
+        const savedTeamInfo = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.teamInfo) || '{}');
+        if (savedTeamInfo.language) currentLanguage = savedTeamInfo.language;
+    } catch (e) { }
+
+    if (PUZZLES.length > 0) {
+        const params = new URLSearchParams(window.location.search);
+        const linkId = standardizeString(params.get('linkid'));
+        const foundFromUrl = PUZZLES.find(p => standardizeString(p.linkid) === linkId);
+        if (foundFromUrl) urlLockedPuzzle = foundFromUrl;
+    }
+
+    if (urlLockedPuzzle) {
+        if (urlLockedPuzzle.id === 1) {
+            const unlockCodeInput = document.getElementById('unlockCode');
+            if (unlockCodeInput) unlockCodeInput.value = "START";
+        }
+    }
+
+    updateTeamStatus();
+    showStep(0);
+
+    // Security is now managed by security.js
+    // setTimeout(setupAntiCheat, 500); 
+
+    // Log session start once we have a session ID
+    submitToGoogleSheets('SESSION_START', {
+        userAgent: navigator.userAgent,
+        screenSize: `${window.innerWidth}x${window.innerHeight}`
+    });
+
+    console.log('Professional Pokédex Initialized - Fresh Session ID:', sessionId);
+});
+
+// ==============================
+// CLEANUP
+// ==============================
+window.addEventListener('beforeunload', () => {
+    stopQRScanner();
+    stopTabMonitoring();
+    cleanupHintSystem();
+
+    if (penaltyTimer) {
+        clearInterval(penaltyTimer);
+    }
+
+    if (penaltyDelayTimeout) {
+        clearTimeout(penaltyDelayTimeout);
+    }
+
+    if (graceCountdownInterval) {
+        clearInterval(graceCountdownInterval);
+    }
+
+    cancelGracePeriodUI();
+
+    saveGameState();
+});
+
+window.addEventListener('beforeunload', (e) => {
+    if (penaltyActive || hintPenaltyActive) {
+        e.preventDefault();
+        e.returnValue = 'You are currently serving a penalty. Are you sure you want to leave?';
+        return e.returnValue;
+    }
+});
+
+// ==============================
+// AUXILIARY INTERFACE LOGIC
+// ==============================
+let isPowerOn = true;
+
+function togglePowerMode() {
+    isPowerOn = !isPowerOn;
+    const indicator = document.getElementById('power-indicator');
+    const crtScreen = document.getElementById('screen');
+
+    if (indicator) {
+        indicator.className = `w-2 h-2 rounded-full transition-all ${isPowerOn ? 'power-on' : 'bg-red-900 shadow-none'}`;
+    }
+
+    if (crtScreen) {
+        if (isPowerOn) {
+            crtScreen.style.filter = '';
+            crtScreen.style.opacity = '1';
+            playSound('powerUp');
+        } else {
+            crtScreen.style.filter = 'brightness(0) contrast(2)';
+            crtScreen.style.opacity = '0.1';
+            playSound('click');
+        }
+    }
+}
+
+function handleAuxClick(btnId) {
+    playSound('click');
+    if ('vibrate' in navigator) navigator.vibrate(20);
+
+    console.log(`Auxiliary Button ${btnId} pressed`);
+
+    // Add a quick flash to the corresponding button
+    const btn = document.getElementById(`aux-btn-${btnId}`);
+    if (btn) {
+        const originalBg = btn.style.background;
+        btn.style.background = 'white';
+        setTimeout(() => btn.style.background = originalBg, 50);
+    }
+
+    // Toggle mute if button 1 is pressed
+    if (btnId === 1) {
+        window.isMuted = !window.isMuted;
+        if (window.isMuted && window.bgMusic) {
+            window.bgMusic.pause();
+        } else if (!window.isMuted && window.bgMusic && !window.bgMusic.paused) {
+            // keep playing
+        }
+        showToast(window.isMuted ? 'Audio Suspended' : 'Audio Active', window.isMuted ? 'error' : 'success');
+    }
+
+    // Toggle Music if button 2 is pressed
+    if (btnId === 2) {
+        if (!window.bgMusic) {
+            window.bgMusic = new Audio('https://play.pokemonshowdown.com/audio/music/battle-trainer.mp3');
+            window.bgMusic.loop = true;
+            window.bgMusic.volume = 0.15;
+        }
+
+        if (window.bgMusic.paused) {
+            window.bgMusic.play().catch(e => console.warn("Music play block:", e));
+            showToast('BGM Active', 'success');
+        } else {
+            window.bgMusic.pause();
+            showToast('BGM Suspended', 'info');
+        }
+    }
+}
+
+// Map globals
+window.togglePowerMode = togglePowerMode;
+window.handleAuxClick = handleAuxClick;
+window.acceptRules = function () {
+    playSound('powerUp');
+    showStep(1);
+};
+
+// ==============================
+// DEBUGGING TOOLS
+// ==============================
+window.testConnection = async function () {
+    console.log('Testing connection to Google Sheets...');
+    showToast('Testing Uplink...', 'info');
+
+    try {
+        const testPayload = {
+            action: 'CONNECTION_TEST',
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent
+        };
+
+        // Add to queue manually to use the robust sender
+        submitToGoogleSheets('CONNECTION_TEST', { note: 'Manual Test Triggered' });
+
+        // Also try a direct ping for console feedback
+        if (!GOOGLE_SCRIPT_URL) {
+            throw new Error('Google Script URL is not defined');
+        }
+
+        console.log('Packet queued. Monitor network tab for "exec" request.');
+        setTimeout(() => {
+            // We can't know for sure if it worked due to no-cors, but we can assume if no error thrown
+            showToast('Uplink Signal Sent', 'success');
+        }, 1000);
+
+    } catch (e) {
+        console.error('Connection Test Failed:', e);
+        showToast('Uplink Failed', 'error');
+        alert('Connection Error: ' + e.message + '\nCheck console for details.');
+    }
+};
+
+// ==============================
+// GLOBAL ERROR HANDLING
+// ==============================
+window.onerror = function (msg, url, lineNo, columnNo, error) {
+    const errorData = {
+        message: msg,
+        script: url,
+        line: lineNo,
+        column: columnNo,
+        stack: error ? error.stack : 'No stack trace'
+    };
+
+    console.error('Global Error Caught:', errorData);
+
+    // Attempt to report critical errors to server
+    // Use a lightweight fire-and-forget approach
+    const payload = {
+        action: 'CLIENT_ERROR',
+        teamName: typeof currentTeam !== 'undefined' ? currentTeam : 'Unknown',
+        errorDetails: JSON.stringify(errorData)
+    };
+
+    // Direct robust fetch for errors
+    if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL) {
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            keepalive: true,
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        }).catch(e => console.warn('Failed to report error', e));
+    }
+
+    return false; // Let default handler run
+};
+
+function triggerFinalCelebration() {
+    const canvas = document.getElementById('celebrationCanvas');
+    const screen = document.getElementById('screen');
+    if (!canvas || !screen) return;
+
+    // Reset and size canvas
+    canvas.width = screen.clientWidth;
+    canvas.height = screen.clientHeight;
+
+    const myConfetti = confetti.create(canvas, {
+        resize: true,
+        useWorker: true
+    });
+
+    // 1. SCREEN FLASH EFFECT
+    screen.style.transition = 'none';
+    screen.style.backgroundColor = 'white';
+    setTimeout(() => {
+        screen.style.transition = 'background-color 2s ease';
+        screen.style.backgroundColor = '';
+    }, 100);
+
+    // 2. FOUNTAIN EFFECT (Vibrant Multi-color)
+    const end = Date.now() + (15 * 1000);
+    const colors = [
+        '#ff0000', // Pokeball Red
+        '#3b82f6', // Greatball Blue
+        '#ffd700', // Ultra/Gold Yellow
+        '#22c55e', // Grass Green
+        '#a855f7', // Masterball Purple
+        '#ffffff', // Pure White
+        '#f97316'  // Fire Orange
+    ];
+
+    (function frame() {
+        myConfetti({
+            particleCount: 3,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0, y: 1 },
+            colors: colors
+        });
+        myConfetti({
+            particleCount: 3,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1, y: 1 },
+            colors: colors
+        });
+
+        if (Date.now() < end) {
+            requestAnimationFrame(frame);
+        }
+    }());
+
+    // 3. PERIODIC STAR BURSTS
+    const starInterval = setInterval(() => {
+        if (Date.now() > end) return clearInterval(starInterval);
+
+        myConfetti({
+            particleCount: 40,
+            spread: 100,
+            origin: { x: Math.random(), y: Math.random() - 0.2 },
+            shapes: ['star'],
+            colors: ['#FFEAB0', '#FFF9E3', '#FACC15']
+        });
+    }, 1500);
+
+    // 4. INITIAL GRAND EXPLOSIONS
+    const burst = (delay, x) => {
+        setTimeout(() => {
+            myConfetti({
+                particleCount: 150,
+                startVelocity: 45,
+                spread: 90,
+                origin: { x: x, y: 0.7 },
+                colors: colors,
+                gravity: 1.2
+            });
+            playSound('success'); // Additional success sounds for impact
+        }, delay);
+    };
+
+    burst(0, 0.5);   // Center
+    burst(400, 0.2); // Left
+    burst(800, 0.8); // Right
+    burst(1200, 0.5); // Center again
+}
+
+window.onunhandledrejection = function (event) {
+    console.error('Unhandled Promise Rejection:', event.reason);
+
+    // Optional: Log promise rejections if they differ significantly from errors
+    if (typeof submitToGoogleSheets === 'function') {
+        submitToGoogleSheets('PROMISE_REJECTION', {
+            reason: event.reason ? event.reason.toString() : 'Unknown Reason'
+        });
+    }
+};
