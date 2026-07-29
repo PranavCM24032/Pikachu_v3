@@ -1,7 +1,9 @@
 @media (max-width: 640px) {
     .pokedex-shell {
         width: calc(100vw - 8px);
+        height: calc(100vh - 8px);
         height: calc(100svh - 8px);
+        height: calc(100dvh - 8px);
         margin: 4px auto;
         border-radius: 12px;
         border-width: 3px;
@@ -15,13 +17,15 @@
 @media (max-height: 700px) {
     .pokedex-shell {
         height: calc(100vh - 10px);
+        height: calc(100svh - 10px);
+        height: calc(100dvh - 10px);
         margin: 5px auto;
     }
 }
 
 @media (min-width: 768px) and (max-height: 900px) {
     .pokedex-shell {
-        max-height: 90vh;
+        max-height: 90dvh;
     }
 }
 
@@ -57,6 +61,8 @@
 @media (orientation: landscape) and (max-height: 500px) {
     .pokedex-shell {
         height: calc(100vh - 10px);
+        height: calc(100svh - 10px);
+        height: calc(100dvh - 10px);
         max-height: none;
     }
 
@@ -118,7 +124,8 @@
 
 @media (min-height: 800px) {
     .pokedex-shell {
-        max-height: 800px;
+        /* Match shell.css max-height: 820px — single source of truth */
+        max-height: 820px;
     }
 }
 
@@ -131,7 +138,9 @@
     @media (max-width: 640px) {
         .pokedex-shell {
             /* Ensure bottom edge always shows even on notched phones */
+            height: calc(100vh  - max(8px, env(safe-area-inset-bottom)) - 8px);
             height: calc(100svh - max(8px, env(safe-area-inset-bottom)) - 8px);
+            height: calc(100dvh - max(8px, env(safe-area-inset-bottom)) - 8px);
             margin-bottom: max(4px, env(safe-area-inset-bottom));
         }
     }

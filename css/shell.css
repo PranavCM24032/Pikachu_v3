@@ -9,10 +9,23 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    /* Pokédex portrait dimensions — never wider than 460px, never taller than 100svh */
+
+    /* Width — never wider than 460px, always within screen */
     width: min(460px, 100vw - 8px);
-    height: min(820px, 100svh - 8px);
     max-width: 460px;
+
+    /*
+     * Height — use dvh (dynamic viewport height) so the shell SHRINKS
+     * when the mobile browser's address bar is visible.
+     * svh = small viewport (browser bar visible) — more conservative, better compat.
+     * dvh = dynamic — adapts as the bar hides/shows.
+     * We subtract 8px for the outer 4px margin top+bottom.
+     */
+    height: calc(100vh - 8px);        /* legacy fallback */
+    height: calc(100svh - 8px);       /* small viewport fallback */
+    height: calc(100dvh - 8px);       /* best: shrinks with browser chrome */
+    max-height: 820px;
+
     margin: auto;
     overflow-y: hidden;
     overflow-x: hidden;
