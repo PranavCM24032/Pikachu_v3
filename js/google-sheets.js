@@ -73,6 +73,11 @@ async function submitToGoogleSheets(action, data = {}) {
 }
 
 async function sendToGoogleSheets(payload) {
+    const team = (payload.teamName || '').trim();
+    if (!team || team === 'Unknown' || team === 'NO TEAM') {
+        console.log('[Sheets] Blocked — invalid team:', team);
+        return;
+    }
     if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("SCRIPT_URL_HERE")) {
         console.warn("[Sheets] URL missing. Cannot send.");
         return;
