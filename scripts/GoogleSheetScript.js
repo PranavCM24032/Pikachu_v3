@@ -53,10 +53,35 @@ function handleRequest(e) {
                 var regSheet = ss.getSheetByName(targetSheetName);
                 if (!regSheet) {
                     regSheet = ss.insertSheet(targetSheetName);
-                    regSheet.appendRow(['Time', 'Team Name', 'Level', 'Type', 'Language', 'UnixTS', 'Raw Data']);
-                    regSheet.getRange(1, 1, 1, 7).setFontWeight("bold").setBackground("#4361ee").setFontColor("white");
+                    regSheet.appendRow(['Time', 'Team Name', 'TID', 'Level', 'Type', 'Language', 'UnixTS', 'Raw Data']);
+                    regSheet.getRange(1, 1, 1, 8).setFontWeight("bold").setBackground("#4361ee").setFontColor("white");
                 }
-                regSheet.appendRow([serverTime, data.teamName, level, type, language, unixTs, JSON.stringify(data)]);
+                regSheet.appendRow([serverTime, data.teamName, data.tid || '', level, type, language, unixTs, JSON.stringify(data)]);
+            } else if (data.action === 'SESSION_BATCH' && data.events) {
+                // Batch: write each buffered event to its sheet
+                for (var bi = 0; bi < data.events.length; bi++) {
+                    var evt = data.events[bi];
+                    var evtMission = evt.mission || '';
+                    var evtLevel = 'N/A';
+                    var evtType = 'N/A';
+                    if (evtMission.indexOf('_') > -1) {
+                        var ep = evtMission.split('_');
+                        evtLevel = ep[0];
+                        evtType = ep[1];
+                    }
+                    var evtLang = evt.language || 'N/A';
+                    var evtTarget = 'General_Logs';
+                    if (evtMission.indexOf('L1') === 0) evtTarget = 'Level_1';
+                    else if (evtMission.indexOf('L2') === 0) evtTarget = 'Level_2';
+                    else if (evtMission.indexOf('L3') === 0) evtTarget = 'Level_3';
+                    var evtSheet = ss.getSheetByName(evtTarget);
+                    if (!evtSheet) {
+                        evtSheet = ss.insertSheet(evtTarget);
+                        evtSheet.appendRow(['ServerTime', 'Action', 'TeamName', 'PuzzleID', 'Language', 'UnixTS', 'FullDataJSON']);
+                        evtSheet.getRange(1, 1, 1, 7).setFontWeight("bold").setBackground("#333333").setFontColor("white");
+                    }
+                    evtSheet.appendRow([serverTime, evt.action, evt.teamName, evt.puzzleId || '', evtLang, unixTs, JSON.stringify(evt)]);
+                }
             } else {
                 if (missionStr.indexOf('L1') === 0) targetSheetName = "Level_1";
                 else if (missionStr.indexOf('L2') === 0) targetSheetName = "Level_2";
