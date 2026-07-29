@@ -1,5 +1,5 @@
 const CONFIG = {
-    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz-QywPm7vj2OAPuNt3xTTtpV0IbSsQcPiYkV3Ck22DuNDTMFZwRUvsusU3S0IOlGmB/exec',
+    SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyVXolSPaqgooiB1JvMwj_rM_Vq0KqwvvEupEgHIgXcCpO_cw0gKYJBHg31AHaEqwPs/exec',
     REFRESH_RATE: 5000,
     VERSION: '2.6.0'
 };
@@ -85,14 +85,27 @@ async function fetchData() {
         const raw = await res.json();
         const newLogs = Array.isArray(raw) ? raw : [];
 
-        if (newLogs.length === 0) {
-            state.logs = [];
-            localStorage.removeItem('pykachuLogs');
-            state.usingCachedData = false;
+        if (Array.isArray(raw)) {
+            if (newLogs.length === 0) {
+                state.logs = [];
+                localStorage.removeItem('pykachuLogs');
+                state.usingCachedData = false;
+            } else {
+                state.logs = newLogs;
+                localStorage.setItem('pykachuLogs', JSON.stringify(state.logs));
+                state.usingCachedData = false;
+            }
         } else {
-            state.logs = newLogs;
-            localStorage.setItem('pykachuLogs', JSON.stringify(state.logs));
-            state.usingCachedData = false;
+            console.warn('[Admin] Server returned error:', raw);
+            if (state.logs.length === 0) {
+                const cached = localStorage.getItem('pykachuLogs');
+                if (cached) {
+                    try {
+                        state.logs = JSON.parse(cached);
+                        state.usingCachedData = true;
+                    } catch (e) { }
+                }
+            }
         }
 
         updateDataSourceIndicator();

@@ -40,11 +40,13 @@ async function submitToGoogleSheets(action, data = {}) {
             teamName: currentTeam || 'Unknown',
             tid: currentTeamTid || '',
             mission: typeof currentMissionLevel !== 'undefined' ? currentMissionLevel : '',
-            language: currentLanguage || 'PYTHON',
             puzzleId: currentPuzzle?.id || 0,
             timestamp: new Date().toISOString(),
             ...data
         };
+        if (action === 'REGISTRATION') {
+            payload.language = currentLanguage || 'PYTHON';
+        }
 
         if (action.includes('HINT')) {
             payload.hintType = 'DECRYPTION_BASED';

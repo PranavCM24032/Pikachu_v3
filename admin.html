@@ -495,7 +495,7 @@
 
     <script>
         const CONFIG = {
-            SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbz-QywPm7vj2OAPuNt3xTTtpV0IbSsQcPiYkV3Ck22DuNDTMFZwRUvsusU3S0IOlGmB/exec',
+            SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyVXolSPaqgooiB1JvMwj_rM_Vq0KqwvvEupEgHIgXcCpO_cw0gKYJBHg31AHaEqwPs/exec',
             REFRESH_RATE: 5000,
             MAX_LOGS: 500,
             VERSION: '2.5.1'
@@ -569,17 +569,20 @@
                 const timestamp = new Date().getTime();
                 const url = `${CONFIG.SCRIPT_URL}?t=${timestamp}`;
 
-                const response = await fetch(url);
+                // Timeout after 12s so the UI doesn't freeze waiting
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 12000);
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
                 if (!response.ok) throw new Error('Network response was not ok');
 
                 const rawData = await response.json();
                 const newLogs = Array.isArray(rawData) ? rawData : [];
 
                 if (newLogs.length === 0) {
-                    console.log('Google Sheet returned empty data, clearing cache');
-                    state.logs = [];
-                    localStorage.removeItem('pykachuLogs');
-                    state.usingCachedData = false;
+                    console.log('Google Sheet returned empty data array — keeping existing cache');
+                    // Do NOT wipe cache or state.logs; sheet may just have no data yet
+                    state.usingCachedData = state.logs.length > 0;
                 } else {
                     state.logs = newLogs;
                     localStorage.setItem('pykachuLogs', JSON.stringify(state.logs));
@@ -669,15 +672,20 @@
                 header.className = "grid grid-cols-12 gap-1 px-2 py-3 bg-slate-950/80 border-b border-slate-800 text-[7px] sm:text-[8px] font-bold text-slate-500 uppercase tracking-widest font-mono text-center";
             }
 
+            // Build teamMeta from ALL logs that have a mission — not just REGISTRATION
+            // This ensures teams who skipped registration still appear in level tabs
             const teamMeta = {};
             state.logs.forEach(log => {
-                if (log.action === 'REGISTRATION' && log.teamName) {
-                    teamMeta[log.teamName.toUpperCase()] = log.mission;
+                const tn = (log.teamName || '').toString().trim().toUpperCase();
+                if (!tn) return;
+                if (log.mission && (!teamMeta[tn] || log.action === 'REGISTRATION')) {
+                    teamMeta[tn] = log.mission;
                 }
             });
 
             const entries = {};
-            const sortedLogs = [...state.logs].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            // Use serverTimestamp (set by Google Apps Script) for chronological sort
+            const sortedLogs = [...state.logs].sort((a, b) => new Date(a.serverTimestamp || a.timestamp) - new Date(b.serverTimestamp || b.timestamp));
             const lastPuzzleForTeam = {};
 
             sortedLogs.forEach(log => {
@@ -685,8 +693,9 @@
                 if (!teamName || teamName === 'UNKNOWN' || teamName === 'NO TEAM') return;
 
                 let pId = log.puzzleId;
-                if (pId === 'undefined' || pId === 'null' || pId === '') pId = null;
-                if (pId === null && log.action === 'REGISTRATION') pId = 0;
+                // Force pId=0 for REGISTRATION before any null checks so it isn't dropped
+                if (log.action === 'REGISTRATION') pId = 0;
+                if (pId === undefined || pId === 'undefined' || pId === 'null' || pId === '') pId = null;
                 if (pId === null && lastPuzzleForTeam[teamName]) {
                     pId = lastPuzzleForTeam[teamName];
                 }
@@ -702,9 +711,10 @@
                         key: entryKey,
                         name: teamName,
                         puzzleId: pId,
-                        mission: teamMeta[teamName] || 'UNKNOWN',
+                        // Use teamMeta first, fall back to the log's own mission field
+                        mission: teamMeta[teamName] || log.mission || 'UNKNOWN',
                         scanQr: '-',
-                        lastActive: new Date(log.timestamp),
+                        lastActive: new Date(log.serverTimestamp || log.timestamp),
                         unlockSuccesses: 0,
                         unlockFails: 0,
                         currentFails: 0,
@@ -715,8 +725,10 @@
                 }
 
                 const entry = entries[entryKey];
-                const logTime = new Date(log.timestamp);
+                const logTime = new Date(log.serverTimestamp || log.timestamp);
                 if (logTime > entry.lastActive) entry.lastActive = logTime;
+                // Always keep mission up to date from any log
+                if (log.mission && entry.mission === 'UNKNOWN') entry.mission = log.mission;
 
                 if (log.action === 'REGISTRATION') {
                     entry.currentStatus = 'READY';
