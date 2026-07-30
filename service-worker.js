@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pykachu-hunt-v3';
+const CACHE_NAME = 'pykachu-hunt-v4';
 const ASSETS = [
     'admin.html',
     'index.html',
@@ -28,6 +28,10 @@ const ASSETS = [
     'js/admin.js',
     'js/security.js',
     'js/include.js',
+    'js/meme.js',
+    'css/meme.css',
+    'html/meme.html',
+    'data/meme.json',
     'html/step0.html',
     'html/step1.html',
     'html/step2.html',

@@ -218,48 +218,44 @@ function submitPuzzleAnswer() {
             clueText.textContent = currentPuzzle.locationClue || "NO SIGNAL SOURCE";
         }
 
-        // Hide location card and next button if clue is null or "END"
-        const isEnd = !currentPuzzle.locationClue || currentPuzzle.locationClue.toUpperCase() === 'END';
-        const completionMessage = document.getElementById('completionMessage');
-
-        if (isEnd) {
-            if (locationCard) locationCard.classList.add('hidden');
-            if (nextBtn) nextBtn.classList.add('hidden');
-            if (completionMessage) {
-                completionMessage.classList.remove('hidden');
-
-                // Dynamic Message based on current level
-                const levelNum = (currentMissionLevel || "L1").split('_')[0].replace('L', '');
-                const levelTitle = document.getElementById('completionLevelTitle');
-                if (levelTitle) levelTitle.textContent = `LEVEL ${levelNum} CHAMPION`;
-
-                const levelSub = document.getElementById('completionLevelSub');
-                if (levelSub) levelSub.textContent = `YOU HAVE COMPLETED LEVEL ${levelNum}`;
-
-                const trophyImg = document.getElementById('completionTrophyImg');
-                if (trophyImg) trophyImg.src = 'images/poketropy.png';
-            }
-
-            // Flush remaining events on game completion
-            setTimeout(() => flushSessionBuffer(), 100);
-
-            // Trigger Grand Celebration
-            setTimeout(() => triggerFinalCelebration(), 1500);
-        } else {
-            if (locationCard) locationCard.classList.remove('hidden');
-            if (nextBtn) nextBtn.classList.remove('hidden');
-            if (completionMessage) completionMessage.classList.add('hidden');
-        }
-
         // Delay move for satisfaction
+        const isEnd = !currentPuzzle.locationClue || currentPuzzle.locationClue.toUpperCase() === 'END';
         setTimeout(() => {
             showStep(5);
             playSound('hologram');
 
+            if (isEnd) {
+                const locationCard = document.getElementById('locationCard');
+                const nextBtn = document.getElementById('nextSignalBtn');
+                if (locationCard) locationCard.classList.add('hidden');
+                if (nextBtn) nextBtn.classList.add('hidden');
+
+                const completionMessage = document.getElementById('completionMessage');
+                if (completionMessage) {
+                    completionMessage.classList.remove('hidden');
+
+                    const levelNum = (currentMissionLevel || "L1").split('_')[0].replace('L', '');
+                    const levelTitle = document.getElementById('completionLevelTitle');
+                    if (levelTitle) levelTitle.textContent = `LEVEL ${levelNum} CHAMPION`;
+
+                    const levelSub = document.getElementById('completionLevelSub');
+                    if (levelSub) levelSub.textContent = `YOU HAVE COMPLETED LEVEL ${levelNum}`;
+
+                    const trophyImg = document.getElementById('completionTrophyImg');
+                    if (trophyImg) trophyImg.src = 'assets/img/poketropy.png';
+                }
+
+                setTimeout(() => flushSessionBuffer(), 100);
+                setTimeout(() => triggerFinalCelebration(), 1500);
+            } else {
+                if (locationCard) locationCard.classList.remove('hidden');
+                if (nextBtn) nextBtn.classList.remove('hidden');
+            }
+
             // 🔥 Play Pokemon Cry from PokeAPI assets
             if (currentPuzzle.pokemonId) {
                 const cryUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/cries/latest/${currentPuzzle.pokemonId}.ogg`;
-                setTimeout(() => playSound(cryUrl, 0.4), 600); // Slight delay after hologram sound
+                setTimeout(() => playSound(cryUrl, 0.4), 600);
             }
         }, 1200);
 

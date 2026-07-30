@@ -1,0 +1,20 @@
+<div id="memePlayerContainer"
+    class="hidden absolute inset-0 z-[130] bg-black flex flex-col">
+    <div class="flex-1 relative bg-black flex items-center justify-center overflow-hidden">
+        <div id="memePlayer" class="w-full h-full"></div>
+        <div id="memeStatusOverlay"
+            class="absolute inset-0 flex items-center justify-center bg-black/60 z-10 hidden">
+            <div class="text-center">
+                <span class="material-symbols-rounded text-white text-5xl block mb-2">check_circle</span>
+                <p class="font-pixel text-white text-sm uppercase">Playback Complete</p>
+            </div>
+        </div>
+    </div>
+    <div class="flex-shrink-0 p-3 sm:p-4 flex justify-center">
+        <button onclick="backToScanner()" onmousedown="playSound('click')"
+            class="btn-pokedex flex items-center justify-center gap-2 py-3 px-6 text-sm sm:text-base">
+            <span class="material-symbols-rounded text-lg">arrow_back</span>
+            BACK TO SCANNER
+        </button>
+    </div>
+</div>

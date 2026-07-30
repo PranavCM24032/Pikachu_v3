@@ -1,7 +1,7 @@
 ﻿.btn-pokedex {
-    background: linear-gradient(145deg, var(--poke-blue), #1E3A8A);
+    background: linear-gradient(145deg, #3b82f6, #2563eb);
     border: none;
-    border-bottom: clamp(2px, 0.5vmin, 4px) solid #1E3A8A;
+    border-bottom: clamp(2px, 0.5vmin, 4px) solid #2563eb;
     border-radius: clamp(6px, 1.5vmin, 10px);
     color: white;
     font-family: 'Press Start 2P', cursive;
@@ -26,7 +26,7 @@
 }
 
 .btn-pokedex:hover {
-    background: linear-gradient(145deg, #2563EB, #1E3A8A);
+    background: linear-gradient(145deg, #60a5fa, #3b82f6);
     transform: translateY(-1px);
     box-shadow:
         0 6px 12px rgba(0, 0, 0, 0.4),
@@ -59,7 +59,7 @@
 @media (hover: none) and (pointer: coarse) {
     .btn-pokedex:hover {
         transform: none;
-        background: linear-gradient(145deg, var(--poke-blue), #1E3A8A);
+        background: linear-gradient(145deg, #3b82f6, #2563eb);
     }
 }
 

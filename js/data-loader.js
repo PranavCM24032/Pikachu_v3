@@ -67,3 +67,19 @@ async function loadTeams() {
         return false;
     }
 }
+
+async function loadMemes() {
+    try {
+        const response = await fetch('data/meme.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        MEMES = await response.json();
+        console.log(`Loaded ${MEMES.length} memes from meme.json`);
+        return true;
+    } catch (error) {
+        console.warn('Could not load meme data:', error);
+        MEMES = [];
+        return false;
+    }
+}

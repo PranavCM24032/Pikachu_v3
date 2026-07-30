@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Pikachu Hunt - Admin</title>
+    <title>Pykachu Hunt - Admin</title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,7 +18,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => { });
+                navigator.serviceWorker.register('service-worker.js').catch(err => { });
             });
         }
     </script>
@@ -216,7 +216,7 @@
                 <div>
                     <h1
                         class="font-pixel text-responsive bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-                        Pikachu<span class="text-white">Hunt</span></h1>
+                        Pykachu<span class="text-white">Hunt</span></h1>
                     <p class="text-[10px] text-slate-500 font-mono tracking-widest uppercase hidden sm:block">Admin
                         Command Node</p>
                     <p class="text-[8px] text-slate-500 font-mono tracking-widest uppercase sm:hidden">ADMIN</p>
@@ -224,93 +224,19 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <div
-                    class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/50 border border-slate-700">
-                    <span class="relative flex h-2 w-2">
-                        <span
-                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                    <span id="systemStatus" class="text-xs font-mono text-green-400">ONLINE</span>
-                </div>
-
-                <div class="flex sm:hidden items-center gap-1">
-                    <button onclick="clearCache()" id="clearBtn"
-                        class="group relative p-2 bg-amber-600 hover:bg-amber-500 transition-all rounded-lg overflow-hidden">
-                        <div class="flex items-center justify-center">
-                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </div>
-                    </button>
-
-                    <button onclick="toggleAutoRefresh()" id="refreshBtn"
-                        class="group relative p-2 bg-indigo-600 hover:bg-indigo-500 transition-all rounded-lg overflow-hidden">
-                        <div class="flex items-center justify-center">
-                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                </path>
-                            </svg>
-                        </div>
-                    </button>
-
-                    <button onclick="wipeData()" id="wipeBtn"
-                        class="group relative p-2 bg-red-600 hover:bg-red-500 transition-all rounded-lg overflow-hidden">
-                        <div class="flex items-center justify-center">
-                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 6h18M9 6v12m6-12v12M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14" />
-                            </svg>
-                        </div>
-                    </button>
-                </div>
-
-                <div class="hidden sm:flex items-center gap-2">
-                    <button onclick="clearCache()" id="clearBtn"
-                        class="group relative px-3 py-2 bg-amber-600 hover:bg-amber-500 transition-all rounded-lg overflow-hidden">
-                        <div
-                            class="absolute inset-0 bg-white/20 group-hover:translate-x-full duration-500 transform -skew-x-12 -translate-x-full">
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                            <span class="text-xs font-bold text-white">CLEAR</span>
-                        </div>
-                    </button>
-
-                    <button onclick="toggleAutoRefresh()" id="refreshBtn"
-                        class="group relative px-3 py-2 bg-indigo-600 hover:bg-indigo-500 transition-all rounded-lg overflow-hidden">
-                        <div
-                            class="absolute inset-0 bg-white/20 group-hover:translate-x-full duration-500 transform -skew-x-12 -translate-x-full">
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                </path>
-                            </svg>
-                            <span class="text-xs font-bold text-white">SYNC</span>
-                        </div>
-                    </button>
-
-                    <button onclick="wipeData()" id="wipeBtn"
-                        class="group relative px-3 py-2 bg-red-600 hover:bg-red-500 transition-all rounded-lg overflow-hidden">
-                        <div
-                            class="absolute inset-0 bg-white/20 group-hover:translate-x-full duration-500 transform -skew-x-12 -translate-x-full">
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 6h18M9 6v12m6-12v12M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14" />
-                            </svg>
-                            <span class="text-xs font-bold text-white">WIPE</span>
-                        </div>
-                    </button>
-                </div>
+                <button onclick="toggleAutoRefresh()" class="sync-btn group relative px-3 py-2 bg-indigo-600 hover:bg-indigo-500 transition-all rounded-lg overflow-hidden flex items-center gap-2 shadow-lg shadow-indigo-500/20 active:scale-95">
+                    <div
+                        class="absolute inset-0 bg-white/20 group-hover:translate-x-full duration-500 transform -skew-x-12 -translate-x-full">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                            </path>
+                        </svg>
+                        <span class="text-xs font-bold text-white tracking-wider">SYNC</span>
+                    </div>
+                </button>
             </div>
         </div>
     </header>
@@ -442,7 +368,7 @@
                 <div
                     class="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
                     <h2 class="text-sm font-bold text-white flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
                         <span class="hidden sm:inline">TEAM STATUS MONITOR</span>
                         <span class="sm:hidden">MONITOR</span>
                         <span id="dataSourceIndicator" class="text-[10px] text-slate-500 font-mono ml-2">[LIVE]</span>
@@ -450,44 +376,48 @@
                     <span class="text-[10px] text-slate-500 font-mono truncate pl-2" id="lastUpdated">SYNCING...</span>
                 </div>
 
-                <div
-                    class="grid grid-cols-12 gap-1 px-2 py-2 sm:py-3 bg-slate-950/80 border-b border-slate-800 text-[7px] sm:text-[8px] font-bold text-slate-500 uppercase tracking-widest font-mono text-center">
-                    <div class="col-span-1">#</div>
-                    <div class="col-span-2 text-left">Team</div>
-                    <div class="col-span-1 border-r border-slate-800">Scan</div>
+                <div class="flex-1 overflow-x-auto flex flex-col min-w-0">
+                    <div class="min-w-[660px] sm:min-w-full flex flex-col flex-1">
+                        <div
+                            class="grid grid-cols-12 gap-1 px-2 py-2 sm:py-3 bg-slate-950/80 border-b border-slate-800 text-[7px] sm:text-[8px] font-bold text-slate-500 uppercase tracking-widest font-mono text-center">
+                            <div class="col-span-1">#</div>
+                            <div class="col-span-2 text-left">Team</div>
+                            <div class="col-span-1 border-r border-slate-800">Scan</div>
 
-                    <div class="col-span-1 text-emerald-600" title="Levels Unlocked">Prev ✓</div>
-                    <div class="col-span-1 text-red-600 border-r border-slate-800" title="Unlock Errors">Prev ✕</div>
+                            <div class="col-span-1 text-emerald-600" title="Levels Unlocked">Prev ✓</div>
+                            <div class="col-span-1 text-red-600 border-r border-slate-800" title="Unlock Errors">Prev ✕</div>
 
-                    <div class="col-span-1 text-white">Puzzle</div>
+                            <div class="col-span-1 text-white">Puzzle</div>
 
-                    <div class="col-span-1 text-red-600" title="Current Puzzle Errors">Curr ✕</div>
-                    <div class="col-span-1 text-emerald-600 border-r border-slate-800" title="Current Puzzle Status">
-                        Curr ✓</div>
+                            <div class="col-span-1 text-red-600" title="Current Puzzle Errors">Curr ✕</div>
+                            <div class="col-span-1 text-emerald-600 border-r border-slate-800" title="Current Puzzle Status">
+                                Curr ✓</div>
 
-                    <div class="col-span-1">Hint</div>
-                    <div class="col-span-1">Tabs</div>
-                    <div class="col-span-1">Time</div>
-                </div>
+                            <div class="col-span-1">Hint</div>
+                            <div class="col-span-1">Tabs</div>
+                            <div class="col-span-1">Time</div>
+                        </div>
 
-                <div id="logsContainer"
-                    class="flex-1 overflow-y-auto divide-y divide-slate-800/50 bg-slate-900/20 font-mono text-xs">
-                    <div class="flex flex-col items-center justify-center h-40 text-slate-600 gap-2">
-                        <svg class="w-8 h-8 animate-spin text-indigo-500/30" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                            </circle>
-                            <path class="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                            </path>
-                        </svg>
-                        <span class="text-xs">ESTABLISHING UPLINK...</span>
+                        <div id="logsContainer"
+                            class="flex-1 overflow-y-auto divide-y divide-slate-800/50 bg-slate-900/20 font-mono text-xs">
+                            <div class="flex flex-col items-center justify-center h-40 text-slate-600 gap-2">
+                                <svg class="w-8 h-8 animate-spin text-indigo-500/30" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                                    </circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                                <span class="text-xs">ESTABLISHING UPLINK...</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div
                     class="px-3 py-2 bg-slate-950/50 border-t border-slate-800 text-[9px] sm:text-[10px] text-slate-600 flex justify-between font-mono">
                     <span class="truncate pr-2">SECURE: TLS_1.3</span>
-                    <span class="truncate pl-2">v2.5.1</span>
+                    <span class="truncate pl-2">v2.6.0</span>
                 </div>
             </div>
         </div>
@@ -767,20 +697,35 @@
                 }
             });
 
+            // Ensure all entries inherit the team's mission from teamMeta if available
+            Object.values(entries).forEach(entry => {
+                if (teamMeta[entry.name]) {
+                    entry.mission = teamMeta[entry.name];
+                }
+            });
+
             let leaderboard = Object.values(entries);
 
             if (searchTerm) {
                 leaderboard = leaderboard.filter(t => t.name.toLowerCase().includes(searchTerm));
             }
 
+            const matchesLevel = (missionStr, targetLvl) => {
+                if (!missionStr) return false;
+                const m = missionStr.toUpperCase();
+                const lvl = targetLvl.toUpperCase();
+                const num = lvl.replace('L', '');
+                return m.includes(lvl) || m.includes('LEVEL_' + num) || m.includes('LEVEL ' + num);
+            };
+
             if (state.activeTab === 'REG') {
                 leaderboard = leaderboard.filter(t => t.puzzleId === '0');
             } else {
-                leaderboard = leaderboard.filter(t => t.mission && t.mission.includes(state.activeTab));
+                leaderboard = leaderboard.filter(t => matchesLevel(t.mission, state.activeTab));
             }
 
             if (levelFilterDropdown !== 'ALL') {
-                leaderboard = leaderboard.filter(t => t.mission && t.mission.includes(levelFilterDropdown));
+                leaderboard = leaderboard.filter(t => matchesLevel(t.mission, levelFilterDropdown));
             }
 
             if (typeFilter !== 'ALL') {
@@ -883,21 +828,30 @@
 
         function toggleAutoRefresh() {
             state.autoRefresh = !state.autoRefresh;
-            const btn = document.getElementById('refreshBtn');
+            const btns = document.querySelectorAll('.sync-btn');
             const status = document.getElementById('systemStatus');
 
             if (state.autoRefresh) {
+                fetchData();
                 startPolling();
-                btn.classList.remove('bg-slate-700', 'bg-indigo-500');
-                btn.classList.add('bg-indigo-600');
-                status.textContent = "ONLINE";
-                status.className = 'text-xs font-mono text-green-400';
+                btns.forEach(btn => {
+                    btn.classList.remove('bg-slate-700');
+                    btn.classList.add('bg-indigo-600');
+                });
+                if (status) {
+                    status.textContent = "ONLINE";
+                    status.className = 'text-xs font-mono text-green-400';
+                }
             } else {
-                clearInterval(state.refreshTimer);
-                btn.classList.remove('bg-indigo-600');
-                btn.classList.add('bg-slate-700');
-                status.textContent = "SYNC PAUSED";
-                status.className = 'text-xs font-mono text-orange-400';
+                if (state.refreshTimer) clearInterval(state.refreshTimer);
+                btns.forEach(btn => {
+                    btn.classList.remove('bg-indigo-600');
+                    btn.classList.add('bg-slate-700');
+                });
+                if (status) {
+                    status.textContent = "SYNC PAUSED";
+                    status.className = 'text-xs font-mono text-orange-400';
+                }
             }
         }
 

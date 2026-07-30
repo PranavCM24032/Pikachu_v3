@@ -1,4 +1,4 @@
-# 📱 Pikachu Android Security Wrapper
+# 📱 Pykachu Android Security Wrapper
 
 To implement **OS-Level Screenshot Blocking**, you must wrap your website into a Native Android App. This folder contains the source code for that wrapper.
 

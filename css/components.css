@@ -1,4 +1,4 @@
-﻿.cyber-grid {
+.cyber-grid {
     position: absolute;
     inset: 0;
     background-image:
@@ -237,8 +237,8 @@
 
 .qr-radar {
     position: relative;
-    width: clamp(120px, 40vmin, 260px);
-    height: clamp(120px, 40vmin, 260px);
+    width: clamp(120px, 30vmin, 200px);
+    height: clamp(120px, 30vmin, 200px);
     margin: 0 auto;
 }
 
@@ -373,7 +373,7 @@
     position: relative;
     width: 100%;
     max-width: 400px;
-    margin: 1rem auto 2rem;
+    margin: 0 auto;
 }
 
 .rules-board.blackboard {

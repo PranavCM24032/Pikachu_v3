@@ -14,18 +14,25 @@
     }
 }
 
-@media (max-height: 700px) {
+@media (max-height: 740px) {
     .pokedex-shell {
         height: calc(100vh - 10px);
         height: calc(100svh - 10px);
         height: calc(100dvh - 10px);
         margin: 5px auto;
+        max-height: 720px;
+    }
+
+    .btn-pokedex {
+        padding: 8px 12px;
+        font-size: 11px;
+        min-height: 38px;
     }
 }
 
 @media (min-width: 768px) and (max-height: 900px) {
     .pokedex-shell {
-        max-height: 90dvh;
+        max-height: 85dvh;
     }
 }
 

@@ -59,49 +59,57 @@ const SecuritySystem = {
         }
     },
 
+    releaseTimer: null,
+
+    cancelRelease() {
+        if (this.releaseTimer) {
+            clearTimeout(this.releaseTimer);
+            this.releaseTimer = null;
+        }
+    },
+
+    scheduleRelease(delay) {
+        this.cancelRelease();
+        this.releaseTimer = setTimeout(() => this.releaseLockdown(), delay);
+    },
+
     bindHardenedEvents() {
         // 1. VISIBILITY (Tab switch / Home button)
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) this.activateLockdown();
             else {
-                // Extended 3-second blackout to outrun slow phone hardware
-                setTimeout(() => this.releaseLockdown(), 3000);
+                this.scheduleRelease(1500);
             }
         });
 
         // 2. WINDOW BLUR (Swipe down notifications / Control Center)
         window.addEventListener('blur', () => this.activateLockdown());
         window.addEventListener('focus', () => {
-            // Extended 3-second blackout to outrun slow phone hardware
-            setTimeout(() => this.releaseLockdown(), 3000);
+            this.scheduleRelease(1500);
         });
 
         // 3. iOS SPECIFIC (Safari Multitasking)
         window.addEventListener('pagehide', () => this.activateLockdown());
 
         // 4. MULTI-TOUCH GESTURE PROTECTION
-        // Detects 5+ fingers (screenshot/split-screen gesture).
-        // 3-4 fingers allowed to avoid false positives during normal use and pinch-to-zoom.
         document.addEventListener('touchstart', (e) => {
             if (e.touches.length >= 5) {
                 console.warn("🛡️ [Security] 5-Finger Gesture Detected");
                 this.activateLockdown();
-                setTimeout(() => this.releaseLockdown(), 4000);
+                this.scheduleRelease(2000);
             }
         }, { passive: true });
 
-        // 5. LOGIC FREEZE DETECTION (Calibrated)
-        // Threshold increased to 1500ms to avoid false positives during heavy operations
-        // (camera + OCR + Tesseract.js processing) on slower mobile devices.
+        // 5. LOGIC FREEZE DETECTION - check every 2s instead of 100ms
         let lastHeartbeat = Date.now();
         setInterval(() => {
             const now = Date.now();
-            if (now - lastHeartbeat > 1500) {
+            if (now - lastHeartbeat > 3000) {
                 this.activateLockdown();
-                setTimeout(() => this.releaseLockdown(), 2000);
+                this.scheduleRelease(1500);
             }
             lastHeartbeat = now;
-        }, 100);
+        }, 2000);
 
         // 6. HARDWARE PRINT SCREEN / RECORDING SHORTCUTS
         document.addEventListener('keydown', (e) => {
@@ -112,11 +120,11 @@ const SecuritySystem = {
 
             if (forbiddenMatch) {
                 this.activateLockdown();
-                setTimeout(() => this.releaseLockdown(), 3000);
+                this.scheduleRelease(2000);
             }
         });
 
-        // 6. PREVENT CONTEXT / DRAG
+        // 7. PREVENT CONTEXT / DRAG
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('dragstart', e => e.preventDefault());
     }

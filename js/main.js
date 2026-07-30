@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await loadPuzzles();
     await loadTeams();
+    await loadMemes();
     initAudio();
 
     if (!sessionId) {
@@ -63,6 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ==============================
 window.addEventListener('beforeunload', () => {
     stopQRScanner();
+    destroyMemePlayer();
     stopTabMonitoring();
     cleanupHintSystem();
 

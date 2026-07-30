@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="css/success.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/security.css">
+    <link rel="stylesheet" href="css/meme.css">
     <link rel="manifest" href="manifest.json">
 
     <!-- iOS PWA Meta Tags -->
@@ -44,38 +45,6 @@
     </script>
 
     <style>
-        /* Mobile-specific optimizations */
-        @media (max-width: 640px) {
-            .pokedex-shell {
-                padding: 10px !important;
-            }
-
-            .crt-container {
-                margin: 4px !important;
-                border-width: 2px !important;
-            }
-
-            .btn-pokedex {
-                padding: 8px 12px !important;
-                font-size: 12px !important;
-            }
-
-            input,
-            select {
-                font-size: 16px !important;
-            }
-        }
-
-        @media (max-width: 380px) {
-            .font-pixel {
-                font-size: 10px !important;
-            }
-
-            .material-symbols-rounded {
-                font-size: 18px !important;
-            }
-        }
-
         html {
             -webkit-text-size-adjust: 100%;
             -moz-text-size-adjust: 100%;
@@ -91,12 +60,9 @@
 
         @media (max-height: 700px) {
             #step4 .code-terminal {
-                max-height: 40vh !important;
+                max-height: 42vh;
             }
         }
-
-        /* Safe-areas are handled in base.css and the body inline style.
-           This block is for non-layout tweaks only. */
     </style>
 </head>
 
@@ -104,8 +70,8 @@
     <div class="pokedex-shell flex flex-col">
 
         <!-- Top Header Section -->
-        <div class="flex gap-2 sm:gap-3 mb-3 sm:mb-4 px-2 pt-1 flex-shrink-0">
-            <!-- Avatar Container -->
+        <div class="flex gap-2 sm:gap-3 items-center mb-3 sm:mb-4 px-2 pt-1 flex-shrink-0">
+            <!-- Left Avatar Container -->
             <div
                 class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center relative flex-shrink-0">
                 <div class="absolute -inset-1 bg-blue-400/30 rounded-full blur-sm"></div>
@@ -132,18 +98,18 @@
             </div>
 
             <!-- Center Content -->
-            <div class="flex-1 text-center flex flex-col justify-center">
+            <div class="flex-1 text-center flex flex-col justify-center px-1 min-w-0">
                 <h1 class="text-base sm:text-lg md:text-xl font-bold text-white select-none truncate px-1"
                     style="text-shadow: 0 2px 6px rgba(4, 7, 19, 0.9), 0 0 8px rgba(19, 40, 73, 0.5);">
-                    <span class="text-blue-400">Pi</span><span class="text-yellow-300">k</span><span
+                    <span class="text-blue-400">Py</span><span class="text-yellow-300">k</span><span
                         class="text-blue-400">achu</span><span class="text-yellow-300"> Hunt</span>
                 </h1>
                 <p class="text-[10px] sm:text-xs md:text-sm text-slate-200 font-medium truncate">Decode Code. Capture
-                    Pikachu.</p>
+                    Pykachu.</p>
             </div>
 
-            <!-- Status Dots -->
-            <div class="flex gap-1 sm:gap-1.5 pt-1 sm:pt-1.5 flex-shrink-0">
+            <!-- Right Status Dots (Symmetrical container width to left lens avatar) -->
+            <div class="w-10 sm:w-12 md:w-14 flex items-center justify-end gap-1 sm:gap-1.5 flex-shrink-0">
                 <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 rounded-full relative">
                     <div
                         class="absolute inset-0 rounded-full bg-gradient-to-br from-red-500 via-red-600 to-red-700 border border-red-900/80">
@@ -226,18 +192,19 @@
 
                 <!-- Overlays loaded from partial -->
                 <div data-include="html/overlays.html"></div>
+                <div data-include="html/meme.html"></div>
 
             </div> <!-- End Screen -->
         </div> <!-- End CRT Container -->
 
         <!-- Compact Auxiliary Interface -->
         <div class="flex justify-between items-center mt-2 px-2 flex-shrink-0" style="padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));">
-            <div class="flex gap-2">
+            <div class="flex items-center gap-2">
                 <div id="aux-btn-1"
-                    class="pokedex-button-bar w-10 h-3 sm:w-12 sm:h-3.5 bg-slate-800 rounded-full shadow-lg cursor-pointer hover:bg-slate-700 active:translate-y-0.5 transition-all min-h-[20px]"
+                    class="pokedex-button-bar w-10 h-3.5 sm:w-12 sm:h-4 bg-slate-800 rounded-full shadow-lg cursor-pointer hover:bg-slate-700 active:translate-y-0.5 transition-all min-h-[22px] border border-slate-700/50"
                     onclick="handleAuxClick(1)" role="button" aria-label="Audio toggle button" tabindex="0"></div>
                 <div id="aux-btn-2"
-                    class="pokedex-button-bar w-10 h-3 sm:w-12 sm:h-3.5 bg-slate-800 rounded-full shadow-lg cursor-pointer hover:bg-slate-700 active:translate-y-0.5 transition-all min-h-[20px]"
+                    class="pokedex-button-bar w-10 h-3.5 sm:w-12 sm:h-4 bg-slate-800 rounded-full shadow-lg cursor-pointer hover:bg-slate-700 active:translate-y-0.5 transition-all min-h-[22px] border border-slate-700/50"
                     onclick="handleAuxClick(2)" role="button" aria-label="Connection test button" tabindex="0"></div>
             </div>
 
@@ -247,7 +214,7 @@
                 <div
                     class="w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full bg-slate-900 shadow-inner flex items-center justify-center group-active:scale-95 transition-transform">
                     <div id="power-indicator"
-                        class="w-2 h-2 rounded-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.8)] transition-all">
+                        class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)] transition-all">
                     </div>
                 </div>
             </div>
@@ -263,6 +230,7 @@
     <script src="js/ui.js"></script>
     <script src="js/screens.js"></script>
     <script src="js/scanner.js"></script>
+    <script src="js/meme.js"></script>
     <script src="js/penalty.js"></script>
     <script src="js/hint.js"></script>
     <script src="js/game.js"></script>

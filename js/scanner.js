@@ -224,20 +224,42 @@ function handleQRScanResult(qrData) {
     console.log('QR Code detected:', qrData);
 
     let linkId = qrData;
+    let memeId = null;
     try {
-        if (qrData.includes('linkid=')) {
+        if (qrData.includes('linkid=') || qrData.includes('memeid=')) {
             try {
                 const url = new URL(qrData);
-                linkId = url.searchParams.get('linkid');
+                linkId = url.searchParams.get('linkid') || qrData;
+                memeId = url.searchParams.get('memeid');
             } catch (e) {
-                const match = qrData.match(/linkid=([^&]*)/i);
-                if (match && match[1]) {
-                    linkId = match[1];
+                const linkMatch = qrData.match(/linkid=([^&]*)/i);
+                if (linkMatch && linkMatch[1]) {
+                    linkId = linkMatch[1];
+                }
+                const memeMatch = qrData.match(/memeid=([^&]*)/i);
+                if (memeMatch && memeMatch[1]) {
+                    memeId = memeMatch[1];
                 }
             }
         }
     } catch (e) {
         console.warn('QR parse error:', e);
+    }
+
+    if (!memeId) {
+        memeId = linkId;
+    }
+
+    const matchedMeme = MEMES.find(m => standardizeString(m.memeid) === standardizeString(memeId));
+
+    if (matchedMeme) {
+        showToast('🎬 Meme Unlocked!', 'success');
+        setTimeout(() => {
+            stopQRScanner();
+            showMemePlayer(matchedMeme);
+            processingQR = false;
+        }, 1000);
+        return;
     }
 
     urlLockedPuzzle = PUZZLES.find(p => standardizeString(p.linkid) === standardizeString(linkId));
@@ -246,11 +268,10 @@ function handleQRScanResult(qrData) {
         submitToGoogleSheets('QR_SCANNED', {
             linkId: linkId,
             puzzleId: urlLockedPuzzle.id,
-            location: urlLockedPuzzle.locationClue // Informative
+            location: urlLockedPuzzle.locationClue
         });
 
         showToast('✓ Signal Acquired - Redirecting...', 'success');
-        // Brief pause to let user see success status
         setTimeout(() => {
             stopQRScanner();
             showStep(3);
@@ -260,7 +281,6 @@ function handleQRScanResult(qrData) {
         console.warn('QR code not recognized:', qrData);
         showToast('❌ Invalid Signal - Access Denied', 'error');
 
-        // Longer pause for error so they can read it before re-scanning
         setTimeout(() => {
             processingQR = false;
         }, 2500);

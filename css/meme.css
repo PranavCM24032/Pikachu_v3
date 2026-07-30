@@ -1,0 +1,15 @@
+/* ==============================
+   MEME PLAYER OVERLAY
+   ============================== */
+#memePlayerContainer {
+    z-index: 130;
+}
+
+#memePlayerContainer iframe {
+    pointer-events: none;
+}
+
+#memePlayer {
+    aspect-ratio: 16/9;
+    max-height: 100%;
+}

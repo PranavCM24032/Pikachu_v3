@@ -1,37 +1,33 @@
 <div id="step2" class="flow-step h-full">
-    <div class="flex flex-col h-full justify-center items-center p-3 sm:p-4 md:p-6">
-        <div class="text-center w-full mb-4 sm:mb-6 shrink-0">
-            <h2
-                class="font-pixel text-blue-400 mb-1 sm:mb-1.5 tracking-widest uppercase text-sm sm:text-base">
+    <div class="flex flex-col h-full justify-center items-center gap-4 p-3 sm:p-5">
+        <div class="text-center w-full shrink-0">
+            <h2 class="font-pixel text-blue-400 mb-1 tracking-widest uppercase text-xs sm:text-sm">
                 Signal Tracking
             </h2>
-            <p class="text-gray-400 mb-3 sm:mb-4 text-xs sm:text-sm">Locate regional QR tags</p>
+            <p class="text-gray-400 text-[10px] sm:text-xs">Locate regional QR tags</p>
+        </div>
 
-            <div class="qr-radar mx-auto mb-4 sm:mb-6">
-                <div class="qr-radar-scan"></div>
-                <div class="qr-radar-scan" style="animation-delay: 0.5s;"></div>
-                <div class="qr-radar-scan" style="animation-delay: 1s;"></div>
-
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <div
-                        class="w-[45%] h-[45%] border-2 border-blue-400/30 rounded-2xl flex items-center justify-center bg-blue-500/5">
-                        <span
-                            class="material-symbols-rounded text-blue-400 animate-pulse text-2xl sm:text-3xl md:text-4xl">
-                            qr_code_scanner
-                        </span>
-                    </div>
+        <div class="qr-radar mx-auto shrink-0">
+            <div class="qr-radar-scan"></div>
+            <div class="qr-radar-scan" style="animation-delay: 0.5s;"></div>
+            <div class="qr-radar-scan" style="animation-delay: 1s;"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="w-[45%] h-[45%] border-2 border-blue-400/30 rounded-2xl flex items-center justify-center bg-blue-500/5">
+                    <span class="material-symbols-rounded text-blue-400 animate-pulse text-2xl sm:text-3xl">
+                        qr_code_scanner
+                    </span>
                 </div>
             </div>
         </div>
 
-        <div class="w-full max-w-xs sm:max-w-sm space-y-3 sm:space-y-4">
+        <div class="w-full max-w-xs space-y-2.5 shrink-0">
             <button onclick="startQRScanner()" onmousedown="playSound('click')"
-                class="btn-pokedex w-full flex items-center justify-center gap-2 sm:gap-3 py-3 sm:py-4 text-sm sm:text-base">
-                <span class="material-symbols-rounded text-lg sm:text-xl">radar</span>
+                class="btn-pokedex w-full flex items-center justify-center gap-2 py-3 text-xs sm:text-sm">
+                <span class="material-symbols-rounded text-base sm:text-lg">radar</span>
                 ACTIVATE SENSORS
             </button>
             <button onclick="showManualEntry()" onmousedown="playSound('click')"
-                class="w-full py-3 sm:py-4 text-xs sm:text-sm text-blue-400/60 hover:text-blue-400 font-pixel border border-blue-400/20 rounded-xl hover:bg-blue-400/5 transition-all uppercase tracking-tighter">
+                class="w-full py-3 text-[10px] sm:text-xs text-blue-400/70 hover:text-blue-400 font-pixel border border-blue-400/30 rounded-xl hover:bg-blue-400/5 transition-all uppercase tracking-tighter">
                 Manual Override
             </button>
         </div>

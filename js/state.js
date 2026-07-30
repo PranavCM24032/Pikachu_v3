@@ -1,5 +1,6 @@
 let PUZZLES = [];
 let TEAMS = [];
+let MEMES = [];
 
 // ==============================
 // GAME STATE
