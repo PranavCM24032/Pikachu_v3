@@ -5,11 +5,21 @@
     z-index: 130;
 }
 
-#memePlayerContainer iframe {
-    pointer-events: none;
+/* YT Player div fills entire area */
+#memePlayerDiv {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
 }
 
-#memePlayer {
-    aspect-ratio: 16/9;
-    max-height: 100%;
+/* YT injects an iframe — make it fill 100% */
+#memePlayerDiv iframe {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    pointer-events: none;
+    border: none !important;
 }

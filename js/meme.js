@@ -1,40 +1,74 @@
 // ==============================
-// MEME QR PLAYER
+// MEME QR PLAYER — YouTube IFrame API
 // ==============================
-let memePlayer = null;
 let memeLoopCounter = 0;
 const MEME_MAX_LOOPS = 3;
+let memePlayer = null;
+let memeYTReady = false;
 
+// ── Load YouTube IFrame API once ──────────────────────────────────────────────
+(function loadYTApi() {
+    if (window.YT || document.getElementById('yt-iframe-api-script')) return;
+    const tag = document.createElement('script');
+    tag.id = 'yt-iframe-api-script';
+    tag.src = 'https://www.youtube.com/iframe_api';
+    tag.async = true;
+    document.head.appendChild(tag);
+})();
+
+// Called by YouTube once API is ready
+window.onYouTubeIframeAPIReady = function () {
+    memeYTReady = true;
+};
+
+// ── URL helpers ───────────────────────────────────────────────────────────────
 function extractVideoId(url) {
-    if (!url) return null;
-    let match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
-    if (match) return match[1];
-    match = url.match(/[?&]v=([a-zA-Z0-9_-]+)/);
-    if (match) return match[1];
-    return url;
+    const text = String(url || '').trim();
+    if (!text) return '';
+    const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
+    const match = text.match(regExp);
+    return (match && match[2] && match[2].length >= 11) ? match[2].split('/')[0] : '';
 }
 
-function loadYouTubeAPI() {
-    return new Promise((resolve) => {
-        if (window.YT && typeof YT.Player === 'function') {
-            resolve();
-            return;
+// ── Player lifecycle ──────────────────────────────────────────────────────────
+function destroyMemePlayer() {
+    if (memePlayer) {
+        try { memePlayer.destroy(); } catch (e) { }
+        memePlayer = null;
+    }
+    memeLoopCounter = 0;
+    window.removeEventListener('message', _memeMessageFallback);
+}
+
+// Fallback postMessage listener (in case YT API fires before our player is ready)
+function _memeMessageFallback(event) {
+    if (event.origin !== 'https://www.youtube.com') return;
+    try {
+        const data = JSON.parse(event.data);
+        if (data.event === 'onStateChange' && data.info === 0) {
+            _handleMemeLoop();
         }
-        const existing = document.querySelector('script[src*="iframe_api"]');
-        if (existing) {
-            const check = setInterval(() => {
-                if (window.YT && typeof YT.Player === 'function') {
-                    clearInterval(check);
-                    resolve();
-                }
-            }, 100);
-            return;
+    } catch (e) { }
+}
+
+function _handleMemeLoop() {
+    memeLoopCounter++;
+    const container = document.getElementById('memePlayerContainer');
+    if (!container) return;
+
+    const start = Number(container.dataset.startTime) || 0;
+
+    if (memeLoopCounter < MEME_MAX_LOOPS) {
+        // Replay from start
+        if (memePlayer && memePlayer.seekTo) {
+            memePlayer.seekTo(start);
+            memePlayer.playVideo();
         }
-        window.onYouTubeIframeAPIReady = resolve;
-        const script = document.createElement('script');
-        script.src = 'https://www.youtube.com/iframe_api';
-        document.head.appendChild(script);
-    });
+    } else {
+        // All loops done
+        const statusOverlay = document.getElementById('memeStatusOverlay');
+        if (statusOverlay) statusOverlay.classList.remove('hidden');
+    }
 }
 
 function showMemePlayer(meme) {
@@ -46,9 +80,12 @@ function showMemePlayer(meme) {
     }
 
     const container = document.getElementById('memePlayerContainer');
+    const playerDiv = document.getElementById('memePlayerDiv');
     const statusOverlay = document.getElementById('memeStatusOverlay');
-    if (!container) return;
+    if (!container || !playerDiv) return;
 
+    // Reset state
+    destroyMemePlayer();
     memeLoopCounter = 0;
     container.dataset.videoId = videoId;
     container.dataset.startTime = meme.starttime || 0;
@@ -56,101 +93,85 @@ function showMemePlayer(meme) {
     container.classList.remove('hidden');
     if (statusOverlay) statusOverlay.classList.add('hidden');
 
-    loadYouTubeAPI().then(() => {
-        createMemePlayer(videoId, meme.starttime || 0, meme.endtime || 0);
-    });
-}
+    const start = Number(meme.starttime) || 0;
+    const end = Number(meme.endtime) || 0;
 
-function createMemePlayer(videoId, startTime, endTime) {
-    if (memePlayer) {
-        try {
-            memePlayer.destroy();
-        } catch (e) {
-            console.warn('Error destroying existing player:', e);
-        }
-        memePlayer = null;
-    }
-
-    let playerElement = document.getElementById('memePlayer');
-    if (!playerElement) {
-        const playerWrapper = document.querySelector('#memePlayerContainer .flex-1');
-        if (playerWrapper) {
-            playerElement = document.createElement('div');
-            playerElement.id = 'memePlayer';
-            playerElement.className = 'w-full h-full';
-            playerWrapper.insertBefore(playerElement, playerWrapper.firstChild);
-        } else {
-            console.error('Meme player container wrapper not found');
-            return;
-        }
-    }
-
-    const playerVars = {
-        controls: 0,
-        modestbranding: 1,
-        rel: 0,
-        showinfo: 0,
-        iv_load_policy: 3,
-        disablekb: 1,
-        fs: 0,
-        playsinline: 1,
-        autoplay: 1,
-        start: startTime || 0
-    };
-
-    if (endTime && Number(endTime) > 0) {
-        playerVars.end = Number(endTime);
-    }
-
-    memePlayer = new YT.Player('memePlayer', {
-        height: '100%',
-        width: '100%',
-        videoId: videoId,
-        playerVars: playerVars,
-        events: {
-            onReady: (event) => {
-                event.target.setVolume(100);
-                event.target.playVideo();
+    function buildPlayer() {
+        memePlayer = new YT.Player('memePlayerDiv', {
+            height: '100%',
+            width: '100%',
+            videoId: videoId,
+            playerVars: {
+                autoplay: 1,
+                controls: 0,
+                modestbranding: 1,
+                rel: 0,
+                iv_load_policy: 3,
+                disablekb: 1,
+                playsinline: 1,
+                enablejsapi: 1,
+                mute: 1,                 // mute=1 guarantees autoplay on all browsers
+                start: start,
+                end: end > 0 ? end : undefined,
+                origin: window.location.origin
             },
-            onStateChange: (event) => {
-                if (event.data === YT.PlayerState.ENDED) {
-                    memeLoopCounter++;
-                    if (memeLoopCounter < MEME_MAX_LOOPS) {
-                        event.target.seekTo(startTime || 0, true);
-                        event.target.playVideo();
-                    } else {
-                        const statusOverlay = document.getElementById('memeStatusOverlay');
-                        if (statusOverlay) statusOverlay.classList.remove('hidden');
+            events: {
+                onReady: function (e) {
+                    e.target.playVideo();
+                    // Try to unmute immediately after play starts
+                    setTimeout(() => {
+                        try {
+                            e.target.unMute();
+                            e.target.setVolume(100);
+                        } catch (_) { }
+                    }, 150);
+                },
+                onStateChange: function (e) {
+                    if (e.data === YT.PlayerState.ENDED) {
+                        _handleMemeLoop();
                     }
                 }
-            },
-            onError: (event) => {
-                console.error('YouTube Player Error:', event.data);
-                showToast('Meme playback error', 'error');
             }
-        }
-    });
-}
-
-function destroyMemePlayer() {
-    if (memePlayer) {
-        try {
-            memePlayer.stopVideo();
-            memePlayer.destroy();
-        } catch (e) {
-            console.warn('Error destroying player:', e);
-        }
-        memePlayer = null;
+        });
     }
-    memeLoopCounter = 0;
+
+    // If YT API already loaded, build immediately; else poll
+    if (window.YT && window.YT.Player) {
+        buildPlayer();
+    } else {
+        const poll = setInterval(() => {
+            if (window.YT && window.YT.Player) {
+                clearInterval(poll);
+                buildPlayer();
+            }
+        }, 100);
+    }
+
+    // Fallback postMessage in case API events don't fire
+    window.addEventListener('message', _memeMessageFallback);
 }
 
 function backToScanner() {
     destroyMemePlayer();
     const container = document.getElementById('memePlayerContainer');
     if (container) container.classList.add('hidden');
-    startQRScanner();
+    if (typeof showStep === 'function') {
+        showStep(2);
+    } else if (typeof startQRScanner === 'function') {
+        startQRScanner();
+    }
+}
+
+// First tap on video area = try to unmute (user gesture unlocks audio)
+function memeAreaTapped() {
+    if (memePlayer && memePlayer.unMute) {
+        try {
+            memePlayer.unMute();
+            memePlayer.setVolume(100);
+        } catch (_) { }
+    }
 }
 
 window.showMemePlayer = showMemePlayer;
 window.backToScanner = backToScanner;
+window.memeAreaTapped = memeAreaTapped;

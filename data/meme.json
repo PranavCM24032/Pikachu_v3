@@ -1,14 +1,14 @@
 [
     {
         "memeid": "M01",
-        "ytlink": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "ytlink": "https://youtu.be/_bT4uaiojF4?si=pIAuaQiuYtkjAZek",
         "starttime": 0,
-        "endtime": 10
+        "endtime": 0
     },
     {
         "memeid": "M02",
-        "ytlink": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+        "ytlink": "https://youtube.com/shorts/UlGtZFk7gxg?si=AT08DTJ5azQzloiy",
         "starttime": 0,
-        "endtime": 10
+        "endtime": 0
     }
 ]
