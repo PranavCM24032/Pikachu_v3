@@ -47,6 +47,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateTeamStatus();
     showStep(0);
 
+    // Pause heavy animations while the tab is hidden
+    document.addEventListener('visibilitychange', () => {
+        document.documentElement.classList.toggle('page-hidden', document.hidden);
+    });
+
     // Security is now managed by security.js
     // setTimeout(setupAntiCheat, 500); 
 
@@ -246,6 +251,15 @@ function triggerFinalCelebration() {
     const canvas = document.getElementById('celebrationCanvas');
     const screen = document.getElementById('screen');
     if (!canvas || !screen) return;
+
+    // Lazy-load the heavy confetti library only when celebrating
+    loadScript('https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js').then(() => {
+        runCelebration(canvas, screen);
+    }).catch(err => console.warn('Confetti load failed:', err));
+}
+
+function runCelebration(canvas, screen) {
+    if (typeof confetti === 'undefined') return;
 
     // Reset and size canvas
     canvas.width = screen.clientWidth;

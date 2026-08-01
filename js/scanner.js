@@ -1,6 +1,18 @@
 // ==============================
 // STEP 2: QR SCANNER
 // ==============================
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) return resolve();
+        const tag = document.createElement('script');
+        tag.src = src;
+        tag.async = true;
+        tag.onload = () => resolve();
+        tag.onerror = () => reject(new Error(`Failed to load ${src}`));
+        document.head.appendChild(tag);
+    });
+}
+
 async function startQRScanner() {
     try {
         videoStream = await navigator.mediaDevices.getUserMedia({
@@ -158,14 +170,22 @@ function startQRCodeDetection() {
     canvas.width = SCAN_WIDTH;
     canvas.height = SCAN_HEIGHT;
 
-    Tesseract.createWorker().then(worker => {
-        worker.loadLanguage('eng').then(() => {
-            worker.initialize('eng').then(() => {
-                ocrWorker = worker;
-                console.log('[Scanner] AI OCR online');
+    // Lazy-load heavy scanning libs only when the scanner actually opens
+    let libsReady = false;
+    Promise.all([
+        loadScript('https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js'),
+        loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js')
+    ]).then(() => {
+        libsReady = true;
+        Tesseract.createWorker().then(worker => {
+            worker.loadLanguage('eng').then(() => {
+                worker.initialize('eng').then(() => {
+                    ocrWorker = worker;
+                    console.log('[Scanner] AI OCR online');
+                });
             });
         });
-    });
+    }).catch(err => console.warn('[Scanner] Lazy lib load failed:', err));
 
     qrScanInterval = setInterval(() => {
         if (!qrScannerActive || video.readyState !== video.HAVE_ENOUGH_DATA) return;
@@ -180,10 +200,12 @@ function startQRCodeDetection() {
             const imageData = context.getImageData(0, 0, SCAN_WIDTH, SCAN_HEIGHT);
 
             // 1. QR Code Look-up
-            const code = jsQR(imageData.data, SCAN_WIDTH, SCAN_HEIGHT);
-            if (code && code.data) {
-                handleQRScanResult(code.data);
-                return;
+            if (libsReady && typeof jsQR === 'function') {
+                const code = jsQR(imageData.data, SCAN_WIDTH, SCAN_HEIGHT);
+                if (code && code.data) {
+                    handleQRScanResult(code.data);
+                    return;
+                }
             }
 
             // 2. Throttled AI OCR (Google Lens style fallback)

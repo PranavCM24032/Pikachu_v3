@@ -140,7 +140,8 @@ function showStep(stepNumber) {
             codeTerminal.style.transition = '';
         }
 
-        // Stop Timer
+        // Stop Timer (leaving step 4 — also stops the hidden scheduler loop)
+        Scheduler.stopTimer('puzzleTimer');
         if (puzzleTimerInterval) {
             clearInterval(puzzleTimerInterval);
             puzzleTimerInterval = null;
@@ -222,23 +223,15 @@ function updateTeamStatus() {
 const Scheduler = {
     timers: new Map(),
 
-    // Smooth Timer using requestAnimationFrame
+    // Lightweight interval-based timer (far cheaper than a 60fps rAF loop)
     startSmoothTimer(id, callback) {
         if (this.timers.has(id)) this.stopTimer(id);
-        let lastTime = performance.now();
-        const loop = (currentTime) => {
-            if (currentTime - lastTime >= 1000) {
-                callback();
-                lastTime = currentTime;
-            }
-            this.timers.set(id, requestAnimationFrame(loop));
-        };
-        this.timers.set(id, requestAnimationFrame(loop));
+        this.timers.set(id, setInterval(callback, 1000));
     },
 
     stopTimer(id) {
         if (this.timers.has(id)) {
-            cancelAnimationFrame(this.timers.get(id));
+            clearInterval(this.timers.get(id));
             this.timers.delete(id);
         }
     }

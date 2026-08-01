@@ -3,17 +3,21 @@
 // ==============================
 let memePlayer = null;
 
-// ── Load YouTube IFrame API once ──────────────────────────────────────────────
-(function loadYTApi() {
-    if (window.YT || document.getElementById('yt-iframe-api-script')) return;
-    const tag = document.createElement('script');
-    tag.id = 'yt-iframe-api-script';
-    tag.src = 'https://www.youtube.com/iframe_api';
-    tag.async = true;
-    document.head.appendChild(tag);
-})();
-
-window.onYouTubeIframeAPIReady = function () { };
+// ── Load YouTube IFrame API lazily (only when a meme is opened) ──────────────
+function ensureYTApiLoaded() {
+    if (window.YT || document.getElementById('yt-iframe-api-script')) return Promise.resolve();
+    return new Promise((resolve) => {
+        const tag = document.createElement('script');
+        tag.id = 'yt-iframe-api-script';
+        tag.src = 'https://www.youtube.com/iframe_api';
+        tag.async = true;
+        window.onYouTubeIframeAPIReady = () => resolve();
+        tag.onload = () => {
+            if (window.YT) resolve();
+        };
+        document.head.appendChild(tag);
+    });
+}
 
 // ── URL helpers ───────────────────────────────────────────────────────────────
 function extractVideoId(url) {
@@ -90,16 +94,9 @@ function showMemePlayer(meme) {
         });
     }
 
-    if (window.YT && window.YT.Player) {
+    ensureYTApiLoaded().then(() => {
         buildPlayer();
-    } else {
-        const poll = setInterval(() => {
-            if (window.YT && window.YT.Player) {
-                clearInterval(poll);
-                buildPlayer();
-            }
-        }, 100);
-    }
+    });
 }
 
 function backToScanner() {

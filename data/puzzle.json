@@ -63,7 +63,7 @@
         "locationClue": "Mechanical Workshop",
         "difficulty": "Easy",
         "points": 10,
-        "hint": null,
+        "hint": "Linear function: work out func(2) and func(3) first, then subtract.",
         "hintPenalty": 60,
         "hintUsed": false,
         "pokemonId": 27
@@ -114,7 +114,7 @@
         "locationClue": null,
         "difficulty": "Hard",
         "points": 30,
-        "hint": null,
+        "hint": "Use BODMAS: handle the brackets first, multiply, then subtract.",
         "hintPenalty": 60,
         "hintUsed": false,
         "pokemonId": 25

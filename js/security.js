@@ -78,14 +78,14 @@ const SecuritySystem = {
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) this.activateLockdown();
             else {
-                this.scheduleRelease(1500);
+                this.scheduleRelease(300);
             }
         });
 
         // 2. WINDOW BLUR (Swipe down notifications / Control Center)
         window.addEventListener('blur', () => this.activateLockdown());
         window.addEventListener('focus', () => {
-            this.scheduleRelease(1500);
+            this.scheduleRelease(300);
         });
 
         // 3. iOS SPECIFIC (Safari Multitasking)

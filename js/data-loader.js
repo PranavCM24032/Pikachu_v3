@@ -48,7 +48,7 @@ async function loadPuzzles() {
 
         // Validate puzzles have required fields
         PUZZLES.forEach((puzzle, index) => {
-            if (!puzzle.id || (!puzzle.questionPython && !puzzle.questionCpp) || !puzzle.answers) {
+            if (!puzzle.id || (!puzzle.questionPython && !puzzle.questionCpp) || !puzzle.answer) {
                 console.error(`Puzzle ${index + 1} is missing required fields`);
             }
         });
