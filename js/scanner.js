@@ -264,6 +264,14 @@ function handleQRScanResult(qrData) {
                 }
             }
         }
+
+        // Fallback: full URL with the ID in the path (e.g. https://host/XG01 or https://host/Pikachu_v3/M01)
+        if (!memeId && (linkId === qrData) && /^https?:\/\//i.test(qrData)) {
+            const url = new URL(qrData);
+            const pathSegs = url.pathname.split('/').filter(Boolean);
+            const lastSeg = pathSegs[pathSegs.length - 1];
+            if (lastSeg) linkId = lastSeg;
+        }
     } catch (e) {
         console.warn('QR parse error:', e);
     }

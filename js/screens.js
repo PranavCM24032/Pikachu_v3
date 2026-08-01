@@ -9,13 +9,16 @@ function showStep(stepNumber) {
 
     if (!targetStep) return;
 
-    // Smooth Transition
+    // Snappy Transition
+    const fadeOutMs = 120;
+    const fadeInMs = 220;
+
     steps.forEach(step => {
         if (step.classList.contains('active')) {
             step.style.opacity = '0';
             step.style.transform = 'translateY(-10px)';
-            step.style.transition = 'all 0.3s ease';
-            setTimeout(() => step.classList.remove('active'), 300);
+            step.style.transition = `all ${fadeOutMs}ms ease`;
+            setTimeout(() => step.classList.remove('active'), fadeOutMs);
         }
     });
 
@@ -23,14 +26,14 @@ function showStep(stepNumber) {
         targetStep.classList.add('active');
         targetStep.style.opacity = '0';
         targetStep.style.transform = 'translateY(10px)';
-        targetStep.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        targetStep.style.transition = `all ${fadeInMs}ms cubic-bezier(0.4, 0, 0.2, 1)`;
 
         // Trigger reflow
         targetStep.offsetHeight;
 
         targetStep.style.opacity = '1';
         targetStep.style.transform = 'translateY(0)';
-    }, 310);
+    }, fadeOutMs + 20);
 
     currentStep = stepNumber;
 

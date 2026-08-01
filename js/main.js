@@ -6,9 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // localStorage.removeItem(CONFIG.STORAGE_KEYS.gameState); 
     // localStorage.removeItem(CONFIG.STORAGE_KEYS.teamInfo); 
 
-    await loadPuzzles();
-    await loadTeams();
-    await loadMemes();
+    await Promise.all([loadPuzzles(), loadTeams(), loadMemes()]);
     initAudio();
 
     if (!sessionId) {

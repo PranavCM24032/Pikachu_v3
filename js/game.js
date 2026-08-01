@@ -72,7 +72,7 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
     setTimeout(() => {
         document.getElementById('screen')?.classList.remove('premium-glow');
         showStep(2);
-    }, 1200);
+    }, 500);
 });
 
 // ==============================
@@ -257,7 +257,7 @@ function submitPuzzleAnswer() {
                 const cryUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/cries/latest/${currentPuzzle.pokemonId}.ogg`;
                 setTimeout(() => playSound(cryUrl, 0.4), 600);
             }
-        }, 1200);
+        }, 500);
 
         submitToGoogleSheets('SOLVED', {
             puzzleId: currentPuzzle.id,
