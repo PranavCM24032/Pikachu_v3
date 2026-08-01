@@ -21,11 +21,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     urlLockedPuzzle = null;
     currentLanguage = "PYTHON";
 
-    // Restore language from saved session
+    // Restore saved session so telemetry (tab-switch penalties, hints, etc.)
+    // keeps being recorded even after a page reload. Without the team + mission
+    // the Google Sheets backend drops every event.
     try {
         const savedTeamInfo = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.teamInfo) || '{}');
-        if (savedTeamInfo.language) currentLanguage = savedTeamInfo.language;
+        if (savedTeamInfo.name) currentTeam = savedTeamInfo.name;
         if (savedTeamInfo.tid) currentTeamTid = savedTeamInfo.tid;
+        if (savedTeamInfo.missionLevel) currentMissionLevel = savedTeamInfo.missionLevel;
+        if (savedTeamInfo.language) currentLanguage = savedTeamInfo.language;
     } catch (e) { }
 
     if (PUZZLES.length > 0) {

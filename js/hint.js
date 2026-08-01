@@ -62,18 +62,30 @@ function setupHintSystem() {
     }
 }
 
-function loadHintState() {
-    const hintState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.hintState) || '{}');
-    const teamKey = `${currentTeam}_${currentPuzzle?.id}`;
+// TRUE source of truth: has this team already paid the penalty for the
+// current puzzle? Reads localStorage directly so a paid hint can never be
+// charged again, even if the in-memory flag gets reset on re-entry.
+function hasPaidHint() {
+    if (!currentPuzzle || !currentTeam) return false;
+    try {
+        const hintState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.hintState) || '{}');
+        const entry = hintState[`${currentTeam}_${currentPuzzle.id}`];
+        return !!(entry && entry.used);
+    } catch (e) {
+        return false;
+    }
+}
 
-    if (currentPuzzle && currentTeam && hintState[teamKey]) {
-        currentPuzzle.hintUsed = hintState[teamKey].used || false;
-        // Do not auto-show hint on load, user must request it again (no penalty will be charged)
-    } else {
+function loadHintState() {
+    const paid = hasPaidHint();
+    if (currentPuzzle) {
+        currentPuzzle.hintUsed = paid;
+    }
+    if (!paid) {
         // Reset hint used status for new team
-        currentPuzzle.hintUsed = false;
         hintDisplayed = false;
     }
+    // Do not auto-show hint on load, user must request it again (no penalty will be charged)
 }
 
 function saveHintState() {
@@ -103,7 +115,7 @@ function requestHint() {
     }
 
     // Already unlocked once for this team+puzzle → reveal instantly, no penalty
-    if (currentPuzzle && currentPuzzle.hintUsed) {
+    if (currentPuzzle && hasPaidHint()) {
         showHint();
         return;
     }
@@ -135,7 +147,7 @@ function confirmHintRequest() {
     if (overlay) overlay.classList.add('hidden');
 
     // Already paid once for this team+puzzle → reveal instantly, no penalty
-    if (currentPuzzle && currentPuzzle.hintUsed) {
+    if (currentPuzzle && hasPaidHint()) {
         showHint();
         return;
     }
@@ -284,6 +296,15 @@ function resetHintPenaltyTimer() {
     if (!hintPenaltyActive) return;
 
     hintTabSwitchDuringPenalty = true;
+
+    // Flag the tab switch as malpractice too, so it shows up in the admin panel
+    tabSwitchCount++;
+    if (typeof submitToGoogleSheets === 'function') {
+        submitToGoogleSheets('PENALTY_TRIGGERED', {
+            puzzleId: currentPuzzle?.id || 0,
+            tabSwitches: tabSwitchCount
+        });
+    }
 
     // RESET TIMER to full duration
     hintPenaltySeconds = (currentPuzzle.hintPenalty && currentPuzzle.hintPenalty > 0) ? currentPuzzle.hintPenalty : 60;
