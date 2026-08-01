@@ -102,12 +102,18 @@ function requestHint() {
         return;
     }
 
+    // Already unlocked once for this team+puzzle → reveal instantly, no penalty
+    if (currentPuzzle && currentPuzzle.hintUsed) {
+        showHint();
+        return;
+    }
+
     // Update penalty time text in overlay dynamically from currentPuzzle.hintPenalty
     const penaltyTime = (currentPuzzle.hintPenalty && currentPuzzle.hintPenalty > 0) ? currentPuzzle.hintPenalty : 60;
     const penaltyTimeEl = document.getElementById('hintPenaltyTime');
     if (penaltyTimeEl) penaltyTimeEl.textContent = `${penaltyTime}`;
 
-    // Always require confirmation before revealing the hint for the first request
+    // Require confirmation before revealing the hint for the FIRST request
     const overlay = document.getElementById('hintRequestOverlay');
     const container = document.getElementById('hintContainer');
     if (container) container.classList.remove('hidden'); // Ensure visible
@@ -127,6 +133,12 @@ function confirmHintRequest() {
     // Hide confirmation overlay
     const overlay = document.getElementById('hintRequestOverlay');
     if (overlay) overlay.classList.add('hidden');
+
+    // Already paid once for this team+puzzle → reveal instantly, no penalty
+    if (currentPuzzle && currentPuzzle.hintUsed) {
+        showHint();
+        return;
+    }
 
     // START THE COUNTDOWN TIMER (Instead of completing immediately)
     startHintPenalty();
