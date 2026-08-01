@@ -235,7 +235,7 @@ window.onerror = function (msg, url, lineNo, columnNo, error) {
             mode: 'no-cors',
             keepalive: true,
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ ...payload, token: GOOGLE_SCRIPT_TOKEN })
         }).catch(e => console.warn('Failed to report error', e));
     }
 

@@ -96,7 +96,28 @@ function requestHint() {
     console.log('Hint requested.');
     if (!currentPuzzle) return;
 
-    // Always require confirmation and timer for every request
+    if (!currentPuzzleHint && currentPuzzle.hint) {
+        currentPuzzleHint = currentPuzzle.hint;
+    }
+    if (!currentPuzzleHint) {
+        showToast('No hint available for this puzzle.', 'info');
+        return;
+    }
+
+    // Hint already unlocked for this team+puzzle → show it immediately, no timer
+    const hintState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.hintState) || '{}');
+    const teamKey = `${currentTeam}_${currentPuzzle.id}`;
+    if (currentTeam && hintState[teamKey] && hintState[teamKey].used) {
+        showHint();
+        return;
+    }
+
+    // Update penalty time text in overlay dynamically from currentPuzzle.hintPenalty
+    const penaltyTime = (currentPuzzle.hintPenalty && currentPuzzle.hintPenalty > 0) ? currentPuzzle.hintPenalty : 60;
+    const penaltyTimeEl = document.getElementById('hintPenaltyTime');
+    if (penaltyTimeEl) penaltyTimeEl.textContent = `${penaltyTime}`;
+
+    // Always require confirmation before revealing the hint for the first request
     const overlay = document.getElementById('hintRequestOverlay');
     const container = document.getElementById('hintContainer');
     if (container) container.classList.remove('hidden'); // Ensure visible
@@ -114,15 +135,29 @@ function confirmHintRequest() {
     clearTimeout(hintRequestTimeout);
 
     // Hide confirmation overlay
-    document.getElementById('hintRequestOverlay').classList.add('hidden');
+    const overlay = document.getElementById('hintRequestOverlay');
+    if (overlay) overlay.classList.add('hidden');
 
-    // Start hint penalty
+    // START THE COUNTDOWN TIMER (Instead of completing immediately)
     startHintPenalty();
 }
 
 function cancelHintRequest() {
     clearTimeout(hintRequestTimeout);
-    document.getElementById('hintRequestOverlay').classList.add('hidden');
+
+    // Hide overlay & stop timer if it was running
+    const overlay = document.getElementById('hintRequestOverlay');
+    if (overlay) overlay.classList.add('hidden');
+
+    if (hintPenaltyActive) {
+        clearInterval(hintPenaltyTimer);
+        hintPenaltyTimer = null;
+        hintPenaltyActive = false;
+        stopHintTabMonitoring();
+        const penaltyOverlay = document.getElementById('hintPenaltyOverlay');
+        if (penaltyOverlay) penaltyOverlay.classList.add('hidden');
+    }
+
     playSound('error');
 }
 
@@ -275,7 +310,13 @@ function resetHintPenaltyTimer() {
 }
 
 function showHint() {
-    if (!currentPuzzleHint) return;
+    if (!currentPuzzleHint && currentPuzzle && currentPuzzle.hint) {
+        currentPuzzleHint = currentPuzzle.hint;
+    }
+    if (!currentPuzzleHint) {
+        showToast('No hint available for this puzzle.', 'info');
+        return;
+    }
 
     const hintContainer = document.getElementById('hintContainer'); // Ensure parent is visible
     const hintDisplay = document.getElementById('hintDisplay');
@@ -326,7 +367,7 @@ function closeHintPopup() {
 
     hintDisplayed = false;
     // We do NOT reset 'currentPuzzle.hintUsed' here because that tracks SCORING (if they used it at least once).
-    // Access is now controlled solely by the button click flow which forces the timer every time.
+    // Re-opening is now handled by requestHint(): the timer only runs for the first request.
 }
 
 function cleanupHintSystem() {

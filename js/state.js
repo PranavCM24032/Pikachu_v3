@@ -72,3 +72,9 @@ function generateSessionId() {
 function standardizeString(str) {
     return (str || '').toString().replace(/\s+/g, '').toUpperCase();
 }
+
+async function sha256(text) {
+    const data = new TextEncoder().encode(String(text));
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}

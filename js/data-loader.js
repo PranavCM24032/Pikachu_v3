@@ -3,19 +3,33 @@
 // ==============================
 const AssetPreloader = {
     cached: new Set(),
+    preloadImage(url) {
+        if (!url || this.cached.has(url)) return;
+        this.cached.add(url);
+        const img = new Image();
+        img.src = url;
+    },
     preload(puzzles) {
-        console.log("🚀 [Assets] Fast-tracking Pokemon & Badge sprites...");
-        puzzles.forEach(p => {
-            if (p.pokemonId) {
-                const img = new Image();
-                img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.pokemonId}.png`;
-                // Pre-cache cry URL hint
-                fetch(`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/cries/latest/${p.pokemonId}.ogg`, { mode: 'no-cors' }).catch(() => { });
-            }
-            if (p.id) {
-                const img = new Image();
-                img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/badges/${p.id}.png`;
-            }
+        console.log("🚀 [Assets] Fast-tracking Pokemon, Badge & UI sprites...");
+
+        const scheduleTask = window.requestIdleCallback || (cb => setTimeout(cb, 50));
+
+        scheduleTask(() => {
+            // Preload critical UI assets & watermarks
+            ['assets/img/poketropy.png', 'assets/img/brock.png', 'assets/img/jenny.png'].forEach(url => {
+                this.preloadImage(url);
+            });
+
+            // Preload puzzle-specific sprites asynchronously
+            puzzles.forEach(p => {
+                if (p.pokemonId) {
+                    this.preloadImage(`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.pokemonId}.png`);
+                    fetch(`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/cries/latest/${p.pokemonId}.ogg`, { mode: 'no-cors' }).catch(() => { });
+                }
+                if (p.id) {
+                    this.preloadImage(`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/badges/${p.id}.png`);
+                }
+            });
         });
     }
 };

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pykachu-hunt-v4';
+const CACHE_NAME = 'pykachu-hunt-v8';
 const ASSETS = [
     'admin.html',
     'index.html',
@@ -11,7 +11,6 @@ const ASSETS = [
     'css/animations.css',
     'css/success.css',
     'css/responsive.css',
-    'css/admin.css',
     'css/security.css',
     'js/config.js',
     'js/state.js',
@@ -25,7 +24,6 @@ const ASSETS = [
     'js/hint.js',
     'js/game.js',
     'js/main.js',
-    'js/admin.js',
     'js/security.js',
     'js/include.js',
     'js/meme.js',
@@ -79,7 +77,17 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
+            if (response && (response.ok || response.status === 0)) {
+                return response;
+            }
+            return fetch(event.request).then((networkResponse) => {
+                if (networkResponse && networkResponse.ok && event.request.method === 'GET' &&
+                    new URL(event.request.url).origin === self.location.origin) {
+                    const responseClone = networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+                }
+                return networkResponse;
+            }).catch(() => response);
         })
     );
 });

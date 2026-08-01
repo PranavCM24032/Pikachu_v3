@@ -103,10 +103,16 @@
                 <div class="relative flex flex-col items-center text-center">
                     <!-- Trophy Display -->
                     <div class="w-16 h-16 sm:w-20 sm:h-20 mb-2 relative flex items-center justify-center">
-                        <div class="absolute inset-0 bg-yellow-400/20 blur-xl rounded-full animate-pulse">
-                        </div>
-                        <img id="completionTrophyImg" src="assets/img/poketropy.png" alt="Level Trophy"
-                            class="w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(234,179,8,0.8)] relative z-10">
+                        <!-- Glow behind -->
+                        <div class="absolute inset-0 bg-yellow-400/20 blur-xl rounded-full animate-pulse pointer-events-none"></div>
+                        <!-- Trophy image — sits on top of glow -->
+                        <img id="completionTrophyImg"
+                            src="assets/img/poketropy.png"
+                            alt="Level Trophy"
+                            loading="eager"
+                            width="80" height="80"
+                            class="relative z-10 w-full h-full object-contain"
+                            style="filter: drop-shadow(0 0 15px rgba(234,179,8,0.8));">
 
                         <div class="gemini-shine shine-1"></div>
                         <div class="gemini-shine shine-2"></div>

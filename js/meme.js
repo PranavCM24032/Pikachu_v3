@@ -1,10 +1,7 @@
 // ==============================
-// MEME QR PLAYER — YouTube IFrame API
+// MEME QR PLAYER — YouTube IFrame API (Infinite Loop)
 // ==============================
-let memeLoopCounter = 0;
-const MEME_MAX_LOOPS = 3;
 let memePlayer = null;
-let memeYTReady = false;
 
 // ── Load YouTube IFrame API once ──────────────────────────────────────────────
 (function loadYTApi() {
@@ -16,10 +13,7 @@ let memeYTReady = false;
     document.head.appendChild(tag);
 })();
 
-// Called by YouTube once API is ready
-window.onYouTubeIframeAPIReady = function () {
-    memeYTReady = true;
-};
+window.onYouTubeIframeAPIReady = function () { };
 
 // ── URL helpers ───────────────────────────────────────────────────────────────
 function extractVideoId(url) {
@@ -36,39 +30,6 @@ function destroyMemePlayer() {
         try { memePlayer.destroy(); } catch (e) { }
         memePlayer = null;
     }
-    memeLoopCounter = 0;
-    window.removeEventListener('message', _memeMessageFallback);
-}
-
-// Fallback postMessage listener (in case YT API fires before our player is ready)
-function _memeMessageFallback(event) {
-    if (event.origin !== 'https://www.youtube.com') return;
-    try {
-        const data = JSON.parse(event.data);
-        if (data.event === 'onStateChange' && data.info === 0) {
-            _handleMemeLoop();
-        }
-    } catch (e) { }
-}
-
-function _handleMemeLoop() {
-    memeLoopCounter++;
-    const container = document.getElementById('memePlayerContainer');
-    if (!container) return;
-
-    const start = Number(container.dataset.startTime) || 0;
-
-    if (memeLoopCounter < MEME_MAX_LOOPS) {
-        // Replay from start
-        if (memePlayer && memePlayer.seekTo) {
-            memePlayer.seekTo(start);
-            memePlayer.playVideo();
-        }
-    } else {
-        // All loops done
-        const statusOverlay = document.getElementById('memeStatusOverlay');
-        if (statusOverlay) statusOverlay.classList.remove('hidden');
-    }
 }
 
 function showMemePlayer(meme) {
@@ -81,20 +42,13 @@ function showMemePlayer(meme) {
 
     const container = document.getElementById('memePlayerContainer');
     const playerDiv = document.getElementById('memePlayerDiv');
-    const statusOverlay = document.getElementById('memeStatusOverlay');
     if (!container || !playerDiv) return;
 
-    // Reset state
     destroyMemePlayer();
-    memeLoopCounter = 0;
-    container.dataset.videoId = videoId;
-    container.dataset.startTime = meme.starttime || 0;
-    container.dataset.endTime = meme.endtime || 0;
     container.classList.remove('hidden');
-    if (statusOverlay) statusOverlay.classList.add('hidden');
 
     const start = Number(meme.starttime) || 0;
-    const end = Number(meme.endtime) || 0;
+    const end   = Number(meme.endtime)   || 0;
 
     function buildPlayer() {
         memePlayer = new YT.Player('memePlayerDiv', {
@@ -102,40 +56,40 @@ function showMemePlayer(meme) {
             width: '100%',
             videoId: videoId,
             playerVars: {
-                autoplay: 1,
-                controls: 0,
-                modestbranding: 1,
-                rel: 0,
-                iv_load_policy: 3,
-                disablekb: 1,
-                playsinline: 1,
-                enablejsapi: 1,
-                mute: 1,                 // mute=1 guarantees autoplay on all browsers
-                start: start,
-                end: end > 0 ? end : undefined,
-                origin: window.location.origin
+                autoplay:        1,
+                controls:        0,
+                modestbranding:  1,
+                rel:             0,
+                showinfo:        0,
+                iv_load_policy:  3,
+                disablekb:       1,
+                playsinline:     1,
+                enablejsapi:     1,
+                mute:            1,       // mute=1 guarantees autoplay on all browsers
+                loop:            1,       // native infinite loop
+                playlist:        videoId, // required for loop to work in IFrame API
+                start:           start,
+                end:             end > 0 ? end : undefined,
+                origin:          window.location.origin
             },
             events: {
                 onReady: function (e) {
                     e.target.playVideo();
-                    // Try to unmute immediately after play starts
+                    // Try to unmute right after play starts
                     setTimeout(() => {
-                        try {
-                            e.target.unMute();
-                            e.target.setVolume(100);
-                        } catch (_) { }
+                        try { e.target.unMute(); e.target.setVolume(100); } catch (_) { }
                     }, 150);
                 },
                 onStateChange: function (e) {
+                    // Backup: if video ends (shouldn't with loop=1), restart manually
                     if (e.data === YT.PlayerState.ENDED) {
-                        _handleMemeLoop();
+                        try { memePlayer.seekTo(start); memePlayer.playVideo(); } catch (_) { }
                     }
                 }
             }
         });
     }
 
-    // If YT API already loaded, build immediately; else poll
     if (window.YT && window.YT.Player) {
         buildPlayer();
     } else {
@@ -146,9 +100,6 @@ function showMemePlayer(meme) {
             }
         }, 100);
     }
-
-    // Fallback postMessage in case API events don't fire
-    window.addEventListener('message', _memeMessageFallback);
 }
 
 function backToScanner() {
@@ -162,16 +113,13 @@ function backToScanner() {
     }
 }
 
-// First tap on video area = try to unmute (user gesture unlocks audio)
+// First tap on video = unmute
 function memeAreaTapped() {
     if (memePlayer && memePlayer.unMute) {
-        try {
-            memePlayer.unMute();
-            memePlayer.setVolume(100);
-        } catch (_) { }
+        try { memePlayer.unMute(); memePlayer.setVolume(100); } catch (_) { }
     }
 }
 
-window.showMemePlayer = showMemePlayer;
-window.backToScanner = backToScanner;
-window.memeAreaTapped = memeAreaTapped;
+window.showMemePlayer  = showMemePlayer;
+window.backToScanner   = backToScanner;
+window.memeAreaTapped  = memeAreaTapped;

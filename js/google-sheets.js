@@ -56,21 +56,20 @@ async function submitToGoogleSheets(action, data = {}) {
 
         // Skip entirely if no valid team (anonymous sessions)
         if (!isValidTeam()) {
-            console.log('[Sheets] Skipping — no valid team');
+            console.log('[Sheets] Skipping — no valid team set');
             return;
         }
 
-        // REGISTRATION: send immediately (critical first step)
-        if (action === 'REGISTRATION') {
-            sendToGoogleSheets(payload);
-            return;
+        // Send immediately in real-time; buffer ONLY if the send fails so the
+        // 10s flush / unload retry never duplicates events that already reached the sheet.
+        const sent = await sendToGoogleSheets(payload);
+        if (!sent) {
+            addToSessionBuffer(payload);
+            console.log(`[Sheets] Buffered ${action} for retry`);
         }
-
-        // Everything else: buffer in localStorage, send later in batch
-        addToSessionBuffer(payload);
 
     } catch (error) {
-        console.error('CRITICAL: Error queuing submission:', error);
+        console.error('CRITICAL: Error submitting telemetry:', error);
     }
 }
 
@@ -82,7 +81,7 @@ async function sendToGoogleSheets(payload) {
     }
     if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("SCRIPT_URL_HERE")) {
         console.warn("[Sheets] URL missing. Cannot send.");
-        return;
+        return false;
     }
     try {
         await fetch(GOOGLE_SCRIPT_URL, {
@@ -91,11 +90,13 @@ async function sendToGoogleSheets(payload) {
             cache: 'no-cache',
             keepalive: true,
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ ...payload, token: GOOGLE_SCRIPT_TOKEN })
         });
         console.log(`[Sheets] Sent: ${payload.action}`);
+        return true;
     } catch (e) {
         console.warn(`[Sheets] Send failed for ${payload.action}:`, e);
+        return false;
     }
 }
 
@@ -118,21 +119,35 @@ async function flushSessionBuffer() {
             cache: 'no-cache',
             keepalive: true,
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'SESSION_BATCH', events: buffer, sessionId: sessionId })
+            body: JSON.stringify({ action: 'SESSION_BATCH', events: buffer, sessionId: sessionId, token: GOOGLE_SCRIPT_TOKEN })
         });
-        console.log(`[Sheets] Flushed ${buffer.length} events`);
+        console.log(`[Sheets] Flushed ${buffer.length} buffered events`);
         clearSessionBuffer();
     } catch (e) {
         console.warn('[Sheets] Flush failed, will retry later:', e);
     }
 }
 
+// Auto-flush buffer every 10 seconds for extra reliability
+setInterval(() => {
+    if (isValidTeam()) {
+        flushSessionBuffer();
+    }
+}, 10000);
+
 // Auto-flush on page unload (sends whatever is buffered)
 window.addEventListener('beforeunload', () => {
     if (isValidTeam()) {
         const buffer = getSessionBuffer();
         if (buffer.length > 0) {
-            sendToGoogleSheets({ action: 'SESSION_BATCH', events: buffer, sessionId: sessionId });
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                keepalive: true,
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'SESSION_BATCH', events: buffer, sessionId: sessionId, token: GOOGLE_SCRIPT_TOKEN })
+            }).catch(() => { });
             clearSessionBuffer();
         }
     }

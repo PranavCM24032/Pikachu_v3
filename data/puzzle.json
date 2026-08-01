@@ -13,7 +13,7 @@
         "difficulty": "Easy",
         "points": 10,
         "hint": "BODMAS",
-        "hintPenalty": 60,
+        "hintPenalty": 10,
         "hintUsed": false,
         "pokemonId": 39
     },

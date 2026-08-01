@@ -7,7 +7,7 @@ function getPuzzleQuestion(puzzle) {
 // ==============================
 // STEP 1: REGISTRATION
 // ==============================
-document.getElementById('registrationForm').addEventListener('submit', function (e) {
+document.getElementById('registrationForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     const teamInput = document.getElementById('teamName').value.trim();
     const passwordInput = document.getElementById('teamPassword').value.trim();
@@ -29,7 +29,7 @@ document.getElementById('registrationForm').addEventListener('submit', function 
         return;
     }
 
-    if (foundTeam.password !== passwordInput) {
+    if (foundTeam.passwordHash !== await sha256(passwordInput)) {
         showFeedback('registrationFeedback', 'Incorrect security key!', 'error');
         triggerShake('teamPassword');
         playSound('error');

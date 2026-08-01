@@ -5,16 +5,29 @@
     z-index: 130;
 }
 
-/* YT Player div fills entire area */
-#memePlayerDiv {
+/* Video clip wrapper — overflow:hidden clips the YT chrome */
+#memeVideoClip {
     position: absolute;
     inset: 0;
+    overflow: hidden;   /* ← this is the key */
+}
+
+/*
+   The YT iframe is pushed UP by 60px (hides top title/channel bar)
+   and made TALLER by 120px total (60 top + 60 bottom hides share/logo bar).
+   overflow:hidden on the parent clips everything outside.
+   No fake black strips needed.
+*/
+#memePlayerDiv {
+    position: absolute;
+    top: -60px;
+    left: 0;
     width: 100%;
-    height: 100%;
+    height: calc(100% + 120px);
     background: #000;
 }
 
-/* YT injects an iframe — make it fill 100% */
+/* YT injects an iframe — fill the memePlayerDiv */
 #memePlayerDiv iframe {
     position: absolute !important;
     inset: 0 !important;

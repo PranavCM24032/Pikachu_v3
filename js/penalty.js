@@ -38,7 +38,9 @@ function handleWindowFocus() {
 }
 
 function triggerPenalty() {
-    if (!isPuzzleActive || currentStep !== 4) return;
+    // Tab-switch penalty only applies while the code is being solved
+    // (step 4 until the correct answer is submitted), NOT during the hint penalty.
+    if (!isPuzzleActive || currentStep !== 4 || hintPenaltyActive) return;
 
     if (penaltyActive) {
         penaltySeconds = 15;
