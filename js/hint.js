@@ -1,6 +1,16 @@
 // ==============================
 // HINT SYSTEM FUNCTIONS
 // ==============================
+function isHintValid(hint) {
+    if (hint === null || hint === undefined) return false;
+    if (typeof hint === 'boolean') return hint === true;
+    if (typeof hint === 'string') {
+        const lower = hint.toLowerCase().trim();
+        return lower !== "none" && lower !== "false" && lower !== "" && lower !== "null";
+    }
+    return false;
+}
+
 function setupHintSystem() {
     console.log('Setting up hint system...');
     if (!currentPuzzle || !CONFIG.FEATURES.hintSystem) return;
@@ -15,20 +25,8 @@ function setupHintSystem() {
 
     currentPuzzleHint = currentPuzzle.hint;
 
-    // VALIDATION: Handle boolean false specifically
-    let isValidHint = false;
-
-    if (typeof currentPuzzleHint === 'boolean') {
-        isValidHint = currentPuzzleHint === true; // If strictly true, valid. If false, invalid.
-    } else if (typeof currentPuzzleHint === 'string') {
-        const lowerHint = currentPuzzleHint.toLowerCase().trim();
-        isValidHint = lowerHint !== "none" && lowerHint !== "false" && lowerHint !== "" && lowerHint !== "null";
-    }
-
-    // FINAL PROTECTION: If hint is explicitly null or undefined in JSON
-    if (currentPuzzleHint === null || currentPuzzleHint === undefined) {
-        isValidHint = false;
-    }
+    // VALIDATION: null/undefined/false/"none"/"" → no hint button
+    const isValidHint = isHintValid(currentPuzzleHint);
 
     if (isValidHint) {
         console.log('Hint detected. Activating UI.');
@@ -101,14 +99,6 @@ function requestHint() {
     }
     if (!currentPuzzleHint) {
         showToast('No hint available for this puzzle.', 'info');
-        return;
-    }
-
-    // Hint already unlocked for this team+puzzle → show it immediately, no timer
-    const hintState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.hintState) || '{}');
-    const teamKey = `${currentTeam}_${currentPuzzle.id}`;
-    if (currentTeam && hintState[teamKey] && hintState[teamKey].used) {
-        showHint();
         return;
     }
 
@@ -348,15 +338,7 @@ function closeHintPopup() {
     document.getElementById('hintDisplay').classList.add('hidden');
 
     // RE-VALIDATE before showing button again
-    let isValidHint = false;
-    if (currentPuzzle && currentPuzzle.hint) {
-        if (typeof currentPuzzle.hint === 'boolean') {
-            isValidHint = currentPuzzle.hint === true;
-        } else {
-            const lower = currentPuzzle.hint.toLowerCase().trim();
-            isValidHint = lower !== "none" && lower !== "false" && lower !== "";
-        }
-    }
+    const isValidHint = isHintValid(currentPuzzle && currentPuzzle.hint);
 
     if (isValidHint) {
         const hintRequestBtn = document.getElementById('hintRequestBtn');
@@ -403,7 +385,7 @@ function resetHintForNewTeam() {
     const hintPenaltyOverlay = document.getElementById('hintPenaltyOverlay');
 
     if (hintDisplay) hintDisplay.classList.add('hidden');
-    if (hintRequestBtn) hintRequestBtn.classList.remove('hidden');
+    if (hintRequestBtn) hintRequestBtn.classList.add('hidden');
     if (hintRequestOverlay) hintRequestOverlay.classList.add('hidden');
     if (hintPenaltyOverlay) hintPenaltyOverlay.classList.add('hidden');
 }
