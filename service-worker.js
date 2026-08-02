@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pykachu-hunt-v10';
+const CACHE_NAME = 'pykachu-hunt-v11';
 const ASSETS = [
     'index.html',
     'css/bundle.min.css',

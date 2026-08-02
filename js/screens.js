@@ -100,7 +100,7 @@ function showStep(stepNumber) {
 
         // Focus on answer input
         setTimeout(() => {
-            const answerInput = document.getElementById('puzzleAnswer');
+            const answerInput = document.getElementById('answerInput');
             if (answerInput) {
                 answerInput.focus();
                 answerInput.value = ''; // Clear previous answer
@@ -120,7 +120,7 @@ function showStep(stepNumber) {
 
         // Ensure puzzle is displayed
         if (currentPuzzle) {
-            const puzzleQuestion = document.getElementById('puzzleQuestion');
+            const puzzleQuestion = document.getElementById('puzzleCode');
             if (puzzleQuestion) {
                 puzzleQuestion.textContent = getPuzzleQuestion(currentPuzzle);
             }

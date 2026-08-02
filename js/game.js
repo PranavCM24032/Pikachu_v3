@@ -139,7 +139,7 @@ document.getElementById('unlockForm').addEventListener('submit', function (e) {
         currentPuzzle = puzzle;
         gameStartTime = new Date(); // Reset timer for the specific puzzle 
 
-        const questionEl = document.getElementById('puzzleQuestion');
+        const questionEl = document.getElementById('puzzleCode');
         if (questionEl) questionEl.textContent = getPuzzleQuestion(puzzle);
 
         // Safely update clue text (might be in Step 5 or 4)
@@ -181,7 +181,7 @@ document.getElementById('unlockForm').addEventListener('submit', function (e) {
 // STEP 4: PUZZLE SOLVING - SUBMIT HANDLER
 // ==============================
 function submitPuzzleAnswer() {
-    const answerInput = document.getElementById('puzzleAnswer');
+    const answerInput = document.getElementById('answerInput');
     if (!answerInput) return;
 
     const answer = answerInput.value.trim().toLowerCase();
@@ -276,7 +276,7 @@ function submitPuzzleAnswer() {
         setTimeout(() => document.getElementById('screen')?.classList.remove('glitch-active'), 400);
 
         answerInput.value = "";
-        triggerShake('puzzleAnswer');
+        triggerShake('answerInput');
 
         submitToGoogleSheets('WRONG_ATTEMPT', {
             puzzleId: currentPuzzle.id,
