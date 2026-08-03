@@ -114,7 +114,7 @@
         "locationClue": null,
         "difficulty": "Hard",
         "points": 30,
-        "hint": "Use BODMAS: handle the brackets first, multiply, then subtract.",
+        "hint": null,
         "hintPenalty": 60,
         "hintUsed": false,
         "pokemonId": 25

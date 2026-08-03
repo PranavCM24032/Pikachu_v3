@@ -4,8 +4,7 @@ module.exports = {
         './index.html',
         './admin.html',
         './html/*.html',
-        './js/*.js',
-        './service-worker.js'
+        './js/*.js'
     ],
     theme: {
         extend: {
@@ -13,6 +12,5 @@ module.exports = {
                 mono: ['JetBrains Mono', 'ui-monospace', 'monospace']
             }
         }
-    },
-    plugins: []
+    }
 };

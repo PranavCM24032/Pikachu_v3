@@ -62,30 +62,18 @@ function setupHintSystem() {
     }
 }
 
-// TRUE source of truth: has this team already paid the penalty for the
-// current puzzle? Reads localStorage directly so a paid hint can never be
-// charged again, even if the in-memory flag gets reset on re-entry.
-function hasPaidHint() {
-    if (!currentPuzzle || !currentTeam) return false;
-    try {
-        const hintState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.hintState) || '{}');
-        const entry = hintState[`${currentTeam}_${currentPuzzle.id}`];
-        return !!(entry && entry.used);
-    } catch (e) {
-        return false;
-    }
-}
-
 function loadHintState() {
-    const paid = hasPaidHint();
-    if (currentPuzzle) {
-        currentPuzzle.hintUsed = paid;
-    }
-    if (!paid) {
+    const hintState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.hintState) || '{}');
+    const teamKey = `${currentTeam}_${currentPuzzle?.id}`;
+
+    if (currentPuzzle && currentTeam && hintState[teamKey]) {
+        currentPuzzle.hintUsed = hintState[teamKey].used || false;
+        // Do not auto-show hint on load, user must request it again (no penalty will be charged)
+    } else {
         // Reset hint used status for new team
+        currentPuzzle.hintUsed = false;
         hintDisplayed = false;
     }
-    // Do not auto-show hint on load, user must request it again (no penalty will be charged)
 }
 
 function saveHintState() {
@@ -114,18 +102,12 @@ function requestHint() {
         return;
     }
 
-    // Already unlocked once for this team+puzzle → reveal instantly, no penalty
-    if (currentPuzzle && hasPaidHint()) {
-        showHint();
-        return;
-    }
-
     // Update penalty time text in overlay dynamically from currentPuzzle.hintPenalty
     const penaltyTime = (currentPuzzle.hintPenalty && currentPuzzle.hintPenalty > 0) ? currentPuzzle.hintPenalty : 60;
     const penaltyTimeEl = document.getElementById('hintPenaltyTime');
     if (penaltyTimeEl) penaltyTimeEl.textContent = `${penaltyTime}`;
 
-    // Require confirmation before revealing the hint for the FIRST request
+    // Always require confirmation before revealing the hint for the first request
     const overlay = document.getElementById('hintRequestOverlay');
     const container = document.getElementById('hintContainer');
     if (container) container.classList.remove('hidden'); // Ensure visible
@@ -145,12 +127,6 @@ function confirmHintRequest() {
     // Hide confirmation overlay
     const overlay = document.getElementById('hintRequestOverlay');
     if (overlay) overlay.classList.add('hidden');
-
-    // Already paid once for this team+puzzle → reveal instantly, no penalty
-    if (currentPuzzle && hasPaidHint()) {
-        showHint();
-        return;
-    }
 
     // START THE COUNTDOWN TIMER (Instead of completing immediately)
     startHintPenalty();
@@ -296,15 +272,6 @@ function resetHintPenaltyTimer() {
     if (!hintPenaltyActive) return;
 
     hintTabSwitchDuringPenalty = true;
-
-    // Flag the tab switch as malpractice too, so it shows up in the admin panel
-    tabSwitchCount++;
-    if (typeof submitToGoogleSheets === 'function') {
-        submitToGoogleSheets('PENALTY_TRIGGERED', {
-            puzzleId: currentPuzzle?.id || 0,
-            tabSwitches: tabSwitchCount
-        });
-    }
 
     // RESET TIMER to full duration
     hintPenaltySeconds = (currentPuzzle.hintPenalty && currentPuzzle.hintPenalty > 0) ? currentPuzzle.hintPenalty : 60;

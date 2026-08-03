@@ -1,9 +1,41 @@
-const CACHE_NAME = 'pykachu-hunt-v10';
+const CACHE_NAME = 'pykachu-hunt-v14';
 const ASSETS = [
+    'admin.html',
     'index.html',
-    'css/bundle.min.css',
-    'js/bundle.min.js',
-    'manifest.json',
+    'css/base.css',
+    'css/shell.css',
+    'css/buttons.css',
+    'css/components.css',
+    'css/terminal.css',
+    'css/overlays.css',
+    'css/animations.css',
+    'css/success.css',
+    'css/responsive.css',
+    'css/security.css',
+    'css/tailwind.css',
+    'js/config.js',
+    'js/state.js',
+    'js/audio.js',
+    'js/data-loader.js',
+    'js/google-sheets.js',
+    'js/ui.js',
+    'js/screens.js',
+    'js/scanner.js',
+    'js/penalty.js',
+    'js/hint.js',
+    'js/game.js',
+    'js/main.js',
+    'js/security.js',
+    'js/include.js',
+    'html/step0.html',
+    'html/step1.html',
+    'html/step2.html',
+    'html/step3.html',
+    'html/step4.html',
+    'html/step5.html',
+    'html/overlays.html',
+    'data/puzzle.json',
+    'data/teams.json',
     'service-worker.js',
     'assets/img/ash.png',
     'assets/img/ash-2.png',
@@ -15,16 +47,6 @@ const ASSETS = [
     'assets/img/officer-jenny.png',
     'assets/img/poketropy.png'
 ];
-
-const DATA_URLS = [
-    '/data/puzzle.json',
-    '/data/teams.json',
-    '/data/meme.json'
-];
-
-function isDataUrl(pathname) {
-    return DATA_URLS.some((entry) => pathname.endsWith(entry));
-}
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
@@ -50,38 +72,17 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    const url = new URL(event.request.url);
-    if (event.request.method !== 'GET' || url.origin !== self.location.origin) {
-        return;
-    }
-
-    if (isDataUrl(url.pathname)) {
-        event.respondWith(networkFirst(event.request));
-        return;
-    }
-
+    // Network-first: always try the server (so fixes propagate immediately),
+    // refresh the cache on success, and fall back to cache when offline.
     event.respondWith(
-        caches.match(event.request).then((response) => {
-            if (response && (response.ok || response.status === 0)) {
-                return response;
-            }
-            return fetch(event.request).then((networkResponse) => {
-                if (networkResponse && networkResponse.ok) {
-                    const responseClone = networkResponse.clone();
-                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+        fetch(event.request)
+            .then((response) => {
+                if (response && response.status === 200 && response.type === 'basic') {
+                    const copy = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
                 }
-                return networkResponse;
-            }).catch(() => response);
-        })
+                return response;
+            })
+            .catch(() => caches.match(event.request))
     );
 });
-
-function networkFirst(request) {
-    return fetch(request).then((networkResponse) => {
-        if (networkResponse && networkResponse.ok) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
-        }
-        return networkResponse;
-    }).catch(() => caches.match(request));
-}

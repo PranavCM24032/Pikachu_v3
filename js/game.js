@@ -29,7 +29,7 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
         return;
     }
 
-    if (foundTeam.passwordHash !== await sha256(passwordInput)) {
+    if (foundTeam.passwordHash !== passwordInput) {
         showFeedback('registrationFeedback', 'Incorrect security key!', 'error');
         triggerShake('teamPassword');
         playSound('error');

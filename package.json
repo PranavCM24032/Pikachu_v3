@@ -4,7 +4,7 @@
   "private": true,
   "description": "Pykachu Hunt - decode the code. capture pikachu.",
   "scripts": {
-    "build": "tailwindcss -i css/tailwind-input.css -o css/tailwind.css --minify && node build.js",
+    "build": "tailwindcss -i css/tailwind-input.css -o css/tailwind.css --minify",
     "serve": "npx serve -s ."
   },
   "devDependencies": {
