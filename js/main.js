@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // localStorage.removeItem(CONFIG.STORAGE_KEYS.teamInfo); 
 
     await Promise.all([loadPuzzles(), loadTeams(), loadMemes()]);
+    await warmupMemePlayer();
     initAudio();
 
     if (!sessionId) {

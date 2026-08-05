@@ -3,6 +3,8 @@
 // ==============================
 let memePlayer = null;
 let ytApiReadyPromise = null;
+let memePlayerReadyPromise = null;
+let memePlayerPreloaded = false;
 
 // ── Load YouTube IFrame API lazily, with a shared promise ─────────────────────
 function ensureYTApiLoaded() {
@@ -26,11 +28,89 @@ function ensureYTApiLoaded() {
     return ytApiReadyPromise;
 }
 
-// Warm the API up during idle so memes open instantly (no network wait)
-if ('requestIdleCallback' in window) {
-    window.requestIdleCallback(() => ensureYTApiLoaded(), { timeout: 4000 });
+function createMemePlayerInstance(videoId, start, end) {
+    return new YT.Player('memePlayerDiv', {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+            autoplay:        0,
+            controls:        0,
+            modestbranding:  1,
+            rel:             0,
+            showinfo:        0,
+            iv_load_policy:  3,
+            disablekb:       1,
+            playsinline:     1,
+            enablejsapi:     1,
+            mute:            1,
+            loop:            0,
+            playlist:        videoId,
+            start:           start,
+            end:             end,
+            origin:          window.location.origin
+        },
+        events: {
+            onReady: function (e) {
+                e.target.pauseVideo();
+                e.target.setVolume(100);
+            },
+            onStateChange: function (e) {
+                if (e.data === YT.PlayerState.ENDED) {
+                    try { memePlayer.seekTo(start); memePlayer.playVideo(); } catch (_) { }
+                }
+            }
+        }
+    });
+}
+
+function warmupMemePlayer() {
+    if (memePlayerPreloaded) return Promise.resolve();
+    if (memePlayerReadyPromise) return memePlayerReadyPromise;
+
+    memePlayerReadyPromise = ensureYTApiLoaded().then(() => {
+        const firstMeme = Array.isArray(MEMES) && MEMES.length ? MEMES[0] : null;
+        const warmupId = firstMeme ? extractVideoId(firstMeme.ytlink) : '';
+        if (!warmupId) return;
+
+        const start = Number(firstMeme.starttime) || 0;
+        const end = normalizeMemeEndTime(start, firstMeme.endtime);
+
+        return new Promise(resolve => {
+            const container = document.getElementById('memePlayerContainer');
+            if (!container) { resolve(); return; }
+
+            const playerDiv = document.getElementById('memePlayerDiv');
+            if (!playerDiv) { resolve(); return; }
+
+            destroyMemePlayer();
+            memePlayer = createMemePlayerInstance(warmupId, start, end);
+            memePlayerPreloaded = true;
+
+            const readyChecker = setInterval(() => {
+                if (memePlayer && typeof memePlayer.getPlayerState === 'function') {
+                    clearInterval(readyChecker);
+                    resolve();
+                }
+            }, 50);
+
+            setTimeout(() => {
+                clearInterval(readyChecker);
+                resolve();
+            }, 3000);
+        });
+    }).catch(() => {
+        memePlayerReadyPromise = null;
+    });
+
+    return memePlayerReadyPromise;
+}
+
+// Warm the API up immediately so memes open faster.
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    ensureYTApiLoaded();
 } else {
-    setTimeout(ensureYTApiLoaded, 3000);
+    document.addEventListener('DOMContentLoaded', () => ensureYTApiLoaded());
 }
 
 // ── URL helpers ───────────────────────────────────────────────────────────────
@@ -120,7 +200,6 @@ function showMemePlayer(meme) {
     const playerDiv = document.getElementById('memePlayerDiv');
     if (!container || !playerDiv) return;
 
-    destroyMemePlayer();
     container.classList.remove('hidden');
 
     const start = Number(meme?.starttime) || 0;
@@ -170,11 +249,25 @@ function showMemePlayer(meme) {
         });
     }
 
-    // Size the player to cover the screen first (needs the container laid out),
-    // which also crops the YT title/logo bars, then build the player.
+    function playWithPlayer() {
+        if (memePlayer && typeof memePlayer.loadVideoById === 'function') {
+            try {
+                memePlayer.loadVideoById({ videoId: videoId, startSeconds: start, endSeconds: end });
+                memePlayer.playVideo();
+                setTimeout(() => {
+                    try { memePlayer.unMute(); memePlayer.setVolume(100); } catch (_) { }
+                }, 150);
+                return;
+            } catch (e) {
+                console.warn('Meme reuse failed, rebuilding player:', e);
+            }
+        }
+        buildPlayer();
+    }
+
     requestAnimationFrame(() => {
         fitMemePlayer();
-        ensureYTApiLoaded().then(buildPlayer);
+        warmupMemePlayer().then(playWithPlayer).catch(playWithPlayer);
     });
 }
 
