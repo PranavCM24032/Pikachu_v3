@@ -42,6 +42,7 @@ function triggerPenalty() {
     // (step 4 until the correct answer is submitted), NOT during the hint penalty.
     if (!isPuzzleActive || currentStep !== 4 || hintPenaltyActive) return;
 
+    tabSwitchCount++;
     if (penaltyActive) {
         penaltySeconds = 15;
         const timerElement = document.getElementById('penaltyTimer');
@@ -56,7 +57,6 @@ function triggerPenalty() {
     }
 
     penaltyActive = true;
-    tabSwitchCount++;
     playSound('error');
 
     const overlay = document.getElementById('penaltyOverlay');

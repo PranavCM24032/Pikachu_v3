@@ -292,12 +292,42 @@ function handleQRScanResult(qrData) {
         return;
     }
 
-    urlLockedPuzzle = PUZZLES.find(p => standardizeString(p.linkid) === standardizeString(linkId));
+    const normalizedInput = standardizeString(linkId);
+    urlLockedPuzzle = PUZZLES.find(p => standardizeString(p.linkid) === normalizedInput);
+
+    // Allow direct start-code entry for the first puzzle
+    if (!urlLockedPuzzle) {
+        urlLockedPuzzle = PUZZLES.find(p =>
+            Array.isArray(p.previousPuzzleId) && p.previousPuzzleId.includes(0) && p.startCode &&
+            standardizeString(p.startCode) === normalizedInput
+        );
+    }
 
     if (urlLockedPuzzle) {
+        // Chain gate: only the NEXT puzzle in the sequence can be scanned.
+        // Trying to jump ahead (e.g. puzzle 1 -> puzzle 4) is rejected here.
+        if (!isPuzzleAllowed(urlLockedPuzzle)) {
+            submitToGoogleSheets('QR_BLOCKED', {
+                linkId: linkId,
+                puzzleId: urlLockedPuzzle.id,
+                puzzleLevel: urlLockedPuzzle.level,
+                requiredPuzzle: (urlLockedPuzzle.previousPuzzleId || []).join('/'),
+                currentProgress: currentPuzzle ? currentPuzzle.id : 0
+            });
+            const msg = puzzleGateMessage(urlLockedPuzzle);
+            urlLockedPuzzle = null;
+            showToast(msg, 'error');
+            playSound('error');
+            setTimeout(() => {
+                processingQR = false;
+            }, 2500);
+            return;
+        }
+
         submitToGoogleSheets('QR_SCANNED', {
             linkId: linkId,
             puzzleId: urlLockedPuzzle.id,
+            puzzleLevel: urlLockedPuzzle.level,
             location: urlLockedPuzzle.locationClue
         });
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pykachu-hunt-v14';
+const CACHE_NAME = 'pykachu-hunt-v19';
 const ASSETS = [
     'admin.html',
     'index.html',
@@ -12,6 +12,7 @@ const ASSETS = [
     'css/success.css',
     'css/responsive.css',
     'css/security.css',
+    'css/meme.css',
     'css/tailwind.css',
     'js/config.js',
     'js/state.js',
@@ -21,6 +22,7 @@ const ASSETS = [
     'js/ui.js',
     'js/screens.js',
     'js/scanner.js',
+    'js/meme.js',
     'js/penalty.js',
     'js/hint.js',
     'js/game.js',
@@ -34,6 +36,7 @@ const ASSETS = [
     'html/step4.html',
     'html/step5.html',
     'html/overlays.html',
+    'html/meme.html',
     'data/puzzle.json',
     'data/teams.json',
     'service-worker.js',

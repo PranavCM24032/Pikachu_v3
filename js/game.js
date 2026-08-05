@@ -41,6 +41,8 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
     currentMissionLevel = missionLevel;
     currentLanguage = codeLanguage;
     resetHintForNewTeam();
+    resetTeamScoreState();
+    loadTeamScoreState();
     gameStartTime = new Date();
 
     if (!sessionId) {
@@ -71,7 +73,8 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
 
     setTimeout(() => {
         document.getElementById('screen')?.classList.remove('premium-glow');
-        showStep(2);
+        // Universal link: skip QR scan and jump straight to that puzzle's unlock
+        showStep(urlLockedPuzzle ? 3 : 2);
     }, 500);
 });
 
@@ -91,27 +94,31 @@ document.getElementById('unlockForm').addEventListener('submit', function (e) {
     let puzzle = null;
 
     if (urlLockedPuzzle) {
-        // If we have a URL-locked puzzle, validate against its prerequisites
-        if (urlLockedPuzzle.previousPuzzleId.includes(0)) {
-            // Starting puzzle - check if it has a specific startCode
-            if (urlLockedPuzzle.startCode) {
-                // Group-specific start code required
-                if (standardizeString(urlLockedPuzzle.startCode) === code) {
+        if (isTestTeam()) {
+            puzzle = urlLockedPuzzle;
+        } else {
+            // If we have a URL-locked puzzle, validate against its prerequisites
+            if (urlLockedPuzzle.previousPuzzleId.includes(0)) {
+                // Starting puzzle - check if it has a specific startCode
+                if (urlLockedPuzzle.startCode) {
+                    // Group-specific start code required
+                    if (standardizeString(urlLockedPuzzle.startCode) === code) {
+                        puzzle = urlLockedPuzzle;
+                    }
+                } else {
+                    // No startCode defined - accept any code (backward compatibility)
                     puzzle = urlLockedPuzzle;
                 }
             } else {
-                // No startCode defined - accept any code (backward compatibility)
-                puzzle = urlLockedPuzzle;
-            }
-        } else {
-            // Check if entered code matches ANY of the previous puzzles' answers
-            const isValid = urlLockedPuzzle.previousPuzzleId.some(prevId => {
-                const prevPuzzle = PUZZLES.find(p => p.id === prevId);
-                return prevPuzzle && standardizeString(prevPuzzle.answer) === code;
-            });
+                // Check if entered code matches ANY of the previous puzzles' answers
+                const isValid = urlLockedPuzzle.previousPuzzleId.some(prevId => {
+                    const prevPuzzle = PUZZLES.find(p => p.id === prevId);
+                    return prevPuzzle && standardizeString(prevPuzzle.answer) === code;
+                });
 
-            if (isValid) {
-                puzzle = urlLockedPuzzle;
+                if (isValid) {
+                    puzzle = urlLockedPuzzle;
+                }
             }
         }
     } else {
@@ -159,6 +166,7 @@ document.getElementById('unlockForm').addEventListener('submit', function (e) {
 
         submitToGoogleSheets('PUZZLE_UNLOCKED', {
             puzzleId: puzzle.id,
+            puzzleLevel: puzzle.level,
             puzzleLink: puzzle.linkid,
             unlockedVia: unlockedVia
         });
@@ -169,6 +177,7 @@ document.getElementById('unlockForm').addEventListener('submit', function (e) {
         submitToGoogleSheets('UNLOCK_FAILED', {
             wrongCode: code,
             attemptedFor: urlLockedPuzzle ? urlLockedPuzzle.id : 'unknown',
+            puzzleLevel: urlLockedPuzzle ? urlLockedPuzzle.level : undefined,
             attemptedLink: urlLockedPuzzle ? urlLockedPuzzle.linkid : 'unknown'
         });
         showFeedback('unlockFeedback', 'Incorrect key', 'error');
@@ -259,11 +268,26 @@ function submitPuzzleAnswer() {
             }
         }, 500);
 
+        const firstSolve = !hasSolvedPuzzle(currentPuzzle.id);
+        const basePoints = currentPuzzle.points || 0;
+        const penaltyPoints = Math.max(1, basePoints / 4);
+        const pointsEarned = firstSolve ? basePoints : -penaltyPoints;
+        recordPuzzleSolve(currentPuzzle.id, pointsEarned);
+
         submitToGoogleSheets('SOLVED', {
             puzzleId: currentPuzzle.id,
             team: currentTeam,
-            answer: answer
+            answer: answer,
+            pointsEarned: pointsEarned,
+            repeatSolve: !firstSolve,
+            totalScore: currentTeamScore
         });
+
+        if (firstSolve) {
+            showToast(`SIGNAL DECRYPTED! +${pointsEarned} pts`, 'success');
+        } else {
+            showToast(`REPEATED SOLVE: -${penaltyPoints} pts`, 'info');
+        }
 
         // Flush buffered events to Google Sheets
         setTimeout(() => flushSessionBuffer(), 500);

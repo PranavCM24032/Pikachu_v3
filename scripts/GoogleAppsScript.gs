@@ -3,9 +3,10 @@
 // =================================================================
 // 4 Tabs in 1 Workbook: Registration, L1, L2, L3
 // Each team gets ONLY 1 ROW per tab, updated in-place.
-// Events are routed to the tab matching the team's REGISTERED mission
-// level: L1_* -> L1, L2_* -> L2, L3_* -> L3. Registration events go
-// only to the Registration tab. All 3 level tabs share one schema.
+// Events are routed to the tab matching the PUZZLE's level: level 1 -> L1,
+// level 2 -> L2, level 3 -> L3 (falls back to the team's registered mission
+// level when no puzzle level is known). Registration events go only to the
+// Registration tab. All 3 level tabs share one schema.
 
 var GAME_STEP_ACTIONS = [
   'QR_SCANNED',
@@ -20,6 +21,14 @@ var GAME_STEP_ACTIONS = [
 ];
 
 var ACCESS_TOKEN = 'pyk2026@secGX42';
+
+// L1/L2/L3 share one schema. Points Earned = sum of positive SOLVED points,
+// Points Lost = sum of |negative| points from repeat solves.
+var LEVEL_HEADERS = [
+  "Last Active", "TID", "Team Name", "Mission", "Status", "Wrong Attempts",
+  "Tab Switches", "Hint Used", "Solve Time", "Nodes Path", "Last Node",
+  "Total Scans", "Points Earned", "Points Lost"
+];
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
@@ -74,9 +83,19 @@ function processEvent(ss, data) {
   // Ignore non-game-step telemetry (SESSION_START, CONNECTION_TEST, PROMISE_REJECTION, ...)
   if (GAME_STEP_ACTIONS.indexOf(action) === -1) return;
 
-  // 2. Route by registered mission level: L1/L2/L3
-  var level = mission.split('_')[0].toUpperCase();
-  if (level !== 'L1' && level !== 'L2' && level !== 'L3') return;
+  // 2. Route by the PUZZLE's level (L1/L2/L3) so each puzzle's data lands in
+  //    the sheet matching its level. Falls back to the team's registered
+  //    mission level when no puzzle level is present.
+  var level = '';
+  if (data.puzzleLevel == 1 || data.puzzleLevel === '1') level = 'L1';
+  else if (data.puzzleLevel == 2 || data.puzzleLevel === '2') level = 'L2';
+  else if (data.puzzleLevel == 3 || data.puzzleLevel === '3') level = 'L3';
+
+  if (!level) {
+    var m = mission.split('_')[0].toUpperCase();
+    if (m === 'L1' || m === 'L2' || m === 'L3') level = m;
+  }
+  if (!level) return;
 
   var sheet = ss.getSheetByName(level);
   updateLevelRow(sheet, teamName, tid, mission, action, data, timestamp);
@@ -100,7 +119,7 @@ function updateRegistrationRow(sheet, teamName, tid, data, timestamp) {
   }
 }
 
-// Unified row updater for L1/L2/L3 tabs (same 12-column schema)
+// Unified row updater for L1/L2/L3 tabs (same 14-column schema)
 function updateLevelRow(sheet, teamName, tid, mission, action, data, timestamp) {
   var rowIdx = findTeamRow(sheet, teamName);
   var isAnswerSubmission = (action === 'SOLVED' || action === 'WRONG_ATTEMPT');
@@ -117,11 +136,13 @@ function updateLevelRow(sheet, teamName, tid, mission, action, data, timestamp) 
     solveTime: '',
     nodesPath: '',
     lastNode: '',
-    totalScans: 0
+    totalScans: 0,
+    pointsEarned: 0,
+    pointsLost: 0
   };
 
   if (rowIdx > 0) {
-    var vals = sheet.getRange(rowIdx, 1, 1, 12).getValues()[0];
+    var vals = sheet.getRange(rowIdx, 1, 1, 14).getValues()[0];
     record.lastActive = isAnswerSubmission ? timestamp : (vals[0] || timestamp);
     record.tid = tid || vals[1];
     record.teamName = vals[2] || teamName;
@@ -134,6 +155,8 @@ function updateLevelRow(sheet, teamName, tid, mission, action, data, timestamp) 
     record.nodesPath = vals[9] || '';
     record.lastNode = vals[10] || '';
     record.totalScans = parseInt(vals[11] || 0);
+    record.pointsEarned = parseInt(vals[12] || 0);
+    record.pointsLost = parseInt(vals[13] || 0);
   }
 
   // Track scanned/unlocked nodes in the path
@@ -150,6 +173,13 @@ function updateLevelRow(sheet, teamName, tid, mission, action, data, timestamp) 
     record.status = 'SOLVED';
     record.solveTime = timestamp;
     record.lastActive = timestamp;
+    // Points: first solves add to earned, repeat solves subtract (lost)
+    var pts = parseInt(data.pointsEarned || 0);
+    if (pts > 0) {
+      record.pointsEarned += pts;
+    } else if (pts < 0) {
+      record.pointsLost += Math.abs(pts);
+    }
   } else if (action === 'WRONG_ATTEMPT') {
     record.wrongAttempts += 1;
     record.status = 'RETRYING';
@@ -164,6 +194,11 @@ function updateLevelRow(sheet, teamName, tid, mission, action, data, timestamp) 
     else record.tabSwitches += 1;
   } else if (action === 'HINT_USED' || action === 'HINT_REQUESTED') {
     record.hintUsed = 'YES';
+    if (typeof data.hintTabSwitchesDuringPenalty === 'number') {
+      record.tabSwitches = data.hintTabSwitchesDuringPenalty;
+    } else if (typeof data.tabSwitchesDuringPenalty === 'number') {
+      record.tabSwitches = data.tabSwitchesDuringPenalty;
+    }
   }
 
   var rowArray = [
@@ -178,11 +213,13 @@ function updateLevelRow(sheet, teamName, tid, mission, action, data, timestamp) 
     record.solveTime,
     record.nodesPath,
     record.lastNode,
-    record.totalScans
+    record.totalScans,
+    record.pointsEarned,
+    record.pointsLost
   ];
 
   if (rowIdx > 0) {
-    sheet.getRange(rowIdx, 1, 1, 12).setValues([rowArray]);
+    sheet.getRange(rowIdx, 1, 1, 14).setValues([rowArray]);
   } else {
     sheet.appendRow(rowArray);
   }
@@ -201,9 +238,9 @@ function findTeamRow(sheet, teamName) {
 function ensureSheetsExist(ss) {
   var tabs = [
     { name: "Registration", headers: ["Registration Time", "TID", "Team Name", "Language", "Mission", "Session ID"] },
-    { name: "L1", headers: ["Last Active", "TID", "Team Name", "Mission", "Status", "Wrong Attempts", "Tab Switches", "Hint Used", "Solve Time", "Nodes Path", "Last Node", "Total Scans"] },
-    { name: "L2", headers: ["Last Active", "TID", "Team Name", "Mission", "Status", "Wrong Attempts", "Tab Switches", "Hint Used", "Solve Time", "Nodes Path", "Last Node", "Total Scans"] },
-    { name: "L3", headers: ["Last Active", "TID", "Team Name", "Mission", "Status", "Wrong Attempts", "Tab Switches", "Hint Used", "Solve Time", "Nodes Path", "Last Node", "Total Scans"] }
+    { name: "L1", headers: LEVEL_HEADERS },
+    { name: "L2", headers: LEVEL_HEADERS },
+    { name: "L3", headers: LEVEL_HEADERS }
   ];
 
   tabs.forEach(function(t) {
@@ -266,7 +303,9 @@ function doGet(e) {
           nodesPath: rows[j][9],
           l3Path: rows[j][9],
           lastNode: rows[j][10],
-          totalScans: parseInt(rows[j][11] || 0)
+          totalScans: parseInt(rows[j][11] || 0),
+          pointsEarned: parseInt(rows[j][12] || 0),
+          pointsLost: parseInt(rows[j][13] || 0)
         });
       }
     });

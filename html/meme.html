@@ -1,26 +1,26 @@
 <div id="memePlayerContainer"
-    class="hidden absolute inset-0 z-[130] bg-black flex flex-col">
+    class="hidden absolute inset-0 z-[130] bg-black">
 
-    <!-- Video Area -->
-    <div class="flex-1 relative bg-black">
+    <!-- Video Area: fills the ENTIRE Pokedex screen -->
+    <div class="absolute inset-0 bg-black">
 
-        <!-- Clip wrapper: overflow:hidden cuts the YT title/logo bars -->
+        <!-- Clip wrapper: overflow:hidden crops the YT title/logo bars -->
         <div id="memeVideoClip">
-            <!-- YT IFrame API mounts here (offset by CSS to clip chrome) -->
+            <!-- YT IFrame API mounts here (sized/centered by meme.js to cover the screen) -->
             <div id="memePlayerDiv"></div>
         </div>
 
         <!-- Tap area: first tap = unmute audio -->
         <div onclick="memeAreaTapped()"
             style="position:absolute;inset:0;z-index:20;background:transparent;cursor:pointer;"></div>
-    </div>
 
-    <!-- Bottom Bar -->
-    <div class="flex-shrink-0 p-3 sm:p-4 flex justify-center bg-black">
-        <button onclick="backToScanner()" onmousedown="playSound('click')"
-            class="btn-pokedex flex items-center justify-center gap-2 py-3 px-6 text-sm sm:text-base">
-            <span class="material-symbols-rounded text-lg">arrow_back</span>
-            BACK TO SCANNER
-        </button>
+        <!-- Back button floats OVER the video at the bottom -->
+        <div class="absolute bottom-0 left-0 right-0 z-30 flex justify-center p-3 sm:p-4 pointer-events-none">
+            <button onclick="backToScanner()" onmousedown="playSound('click')"
+                class="btn-pokedex pointer-events-auto flex items-center justify-center gap-2 py-3 px-6 text-sm sm:text-base">
+                <span class="material-symbols-rounded text-lg">arrow_back</span>
+                BACK TO SCANNER
+            </button>
+        </div>
     </div>
 </div>

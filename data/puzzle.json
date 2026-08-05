@@ -8,13 +8,12 @@
         "previousPuzzleId": [
             0
         ],
-        "startCode": "GRASS",
+        "startCode": "START",
         "locationClue": "Cental Library",
-        "difficulty": "Easy",
+        "level": 1,
         "points": 10,
         "hint": "BODMAS",
         "hintPenalty": 10,
-        "hintUsed": false,
         "pokemonId": 39
     },
     {
@@ -27,11 +26,10 @@
             1
         ],
         "locationClue": "Main entrance",
-        "difficulty": "Easy",
+        "level": 1,
         "points": 10,
         "hint": "Simple arithmetic",
         "hintPenalty": 60,
-        "hintUsed": false,
         "pokemonId": 7
     },
     {
@@ -44,11 +42,10 @@
             2
         ],
         "locationClue": "OOP Lab",
-        "difficulty": "Easy",
+        "level": 1,
         "points": 10,
         "hint": "Power of 2",
         "hintPenalty": 60,
-        "hintUsed": false,
         "pokemonId": 4
     },
     {
@@ -61,11 +58,10 @@
             3
         ],
         "locationClue": "Mechanical Workshop",
-        "difficulty": "Easy",
+        "level": 1,
         "points": 10,
         "hint": "Linear function: work out func(2) and func(3) first, then subtract.",
         "hintPenalty": 60,
-        "hintUsed": false,
         "pokemonId": 27
     },
     {
@@ -78,11 +74,10 @@
             4
         ],
         "locationClue": "MBA seminar hall",
-        "difficulty": "Medium",
+        "level": 2,
         "points": 20,
         "hint": "Conditional logic",
         "hintPenalty": 60,
-        "hintUsed": false,
         "pokemonId": 6
     },
     {
@@ -95,11 +90,10 @@
             5
         ],
         "locationClue": "Cental Library",
-        "difficulty": "Medium",
+        "level": 2,
         "points": 20,
         "hint": "Sum of series",
         "hintPenalty": 60,
-        "hintUsed": false,
         "pokemonId": 658
     },
     {
@@ -112,11 +106,10 @@
             6
         ],
         "locationClue": null,
-        "difficulty": "Hard",
+        "level": 3,
         "points": 30,
         "hint": null,
         "hintPenalty": 60,
-        "hintUsed": false,
         "pokemonId": 25
     }
 ]

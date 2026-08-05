@@ -33,7 +33,8 @@ function setupHintSystem() {
         hintContainer.classList.remove('hidden');
 
         // Reset UI Components
-        document.getElementById('hintDisplay').classList.add('hidden');
+        const hintDisplay = document.getElementById('hintDisplay');
+        if (hintDisplay) hintDisplay.classList.add('hidden');
         if (document.getElementById('hintRequestOverlay'))
             document.getElementById('hintRequestOverlay').classList.add('hidden');
         if (document.getElementById('hintPenaltyOverlay'))
@@ -52,8 +53,10 @@ function setupHintSystem() {
         const penaltyTimeEl = document.getElementById('hintPenaltyTime');
         if (penaltyTimeEl) penaltyTimeEl.textContent = `${penaltyTime}`;
 
-        // Load State (Check if already unlocked)
+        // Load state for analytics or tracking only.
         loadHintState();
+        // NOTE: hint is NOT auto-shown on load. The button stays visible so the
+        // player can re-open it freely; requestHint() will always charge the penalty.
     } else {
         console.log('No valid hint available (false/none). Hiding UI.');
         hintContainer.classList.add('hidden');
@@ -68,7 +71,7 @@ function loadHintState() {
 
     if (currentPuzzle && currentTeam && hintState[teamKey]) {
         currentPuzzle.hintUsed = hintState[teamKey].used || false;
-        // Do not auto-show hint on load, user must request it again (no penalty will be charged)
+        // Do not auto-show hint on load, user must request it again each time.
     } else {
         // Reset hint used status for new team
         currentPuzzle.hintUsed = false;
@@ -107,22 +110,27 @@ function requestHint() {
     const penaltyTimeEl = document.getElementById('hintPenaltyTime');
     if (penaltyTimeEl) penaltyTimeEl.textContent = `${penaltyTime}`;
 
-    // Always require confirmation before revealing the hint for the first request
+    // Always require confirmation and penalty before revealing the hint
     const overlay = document.getElementById('hintRequestOverlay');
     const container = document.getElementById('hintContainer');
     if (container) container.classList.remove('hidden'); // Ensure visible
     if (overlay) overlay.classList.remove('hidden');
 
     // Auto-cancel if ignored
+    const requestTimeout = (CONFIG.HINT_SETTINGS?.hintRequestTimeout && CONFIG.HINT_SETTINGS.hintRequestTimeout > 0)
+        ? CONFIG.HINT_SETTINGS.hintRequestTimeout * 1000
+        : 30000;
+
     if (hintRequestTimeout) clearTimeout(hintRequestTimeout);
     hintRequestTimeout = setTimeout(() => {
         cancelHintRequest();
         showToast('Hint request timed out', 'error');
-    }, 30000); // 30s timeout
+    }, requestTimeout);
 }
 
 function confirmHintRequest() {
     clearTimeout(hintRequestTimeout);
+    hintRequestConfirmed = true;
 
     // Hide confirmation overlay
     const overlay = document.getElementById('hintRequestOverlay');
@@ -134,6 +142,7 @@ function confirmHintRequest() {
 
 function cancelHintRequest() {
     clearTimeout(hintRequestTimeout);
+    hintRequestConfirmed = false;
 
     // Hide overlay & stop timer if it was running
     const overlay = document.getElementById('hintRequestOverlay');
@@ -156,6 +165,7 @@ function startHintPenalty() {
 
     hintPenaltyActive = true;
     hintTabSwitchDuringPenalty = false;
+    hintTabSwitchCount = 0;
 
     // Visibility Check
     const hintContainer = document.getElementById('hintContainer');
@@ -231,7 +241,9 @@ function completeHintPenalty() {
         puzzleId: currentPuzzle.id,
         hintText: currentPuzzleHint,
         penaltyServed: true,
-        tabSwitchesDuringPenalty: hintTabSwitchDuringPenalty
+        hintTabSwitchesDuringPenalty: hintTabSwitchCount,
+        tabSwitchesDuringPenalty: hintTabSwitchDuringPenalty,
+        tabSwitches: tabSwitchCount
     });
 
     playSound('hintReveal');
@@ -272,6 +284,8 @@ function resetHintPenaltyTimer() {
     if (!hintPenaltyActive) return;
 
     hintTabSwitchDuringPenalty = true;
+    hintTabSwitchCount++;
+    tabSwitchCount++;
 
     // RESET TIMER to full duration
     hintPenaltySeconds = (currentPuzzle.hintPenalty && currentPuzzle.hintPenalty > 0) ? currentPuzzle.hintPenalty : 60;
@@ -325,6 +339,11 @@ function showHint() {
         }
     }
 
+    const hintRequestOverlay = document.getElementById('hintRequestOverlay');
+    const hintPenaltyOverlay = document.getElementById('hintPenaltyOverlay');
+    if (hintRequestOverlay) hintRequestOverlay.classList.add('hidden');
+    if (hintPenaltyOverlay) hintPenaltyOverlay.classList.add('hidden');
+
     hintDisplayed = true;
 
     // Mark hint as used for this team
@@ -335,9 +354,17 @@ function showHint() {
 }
 
 function closeHintPopup() {
-    document.getElementById('hintDisplay').classList.add('hidden');
+    const hintDisplay = document.getElementById('hintDisplay');
+    if (hintDisplay) hintDisplay.classList.add('hidden');
 
-    // RE-VALIDATE before showing button again
+    const hintRequestOverlay = document.getElementById('hintRequestOverlay');
+    const hintPenaltyOverlay = document.getElementById('hintPenaltyOverlay');
+    if (hintRequestOverlay) hintRequestOverlay.classList.add('hidden');
+    if (hintPenaltyOverlay) hintPenaltyOverlay.classList.add('hidden');
+
+    // RE-VALIDATE before showing button again.
+    // The button reappears even when the hint was already paid for: re-opening
+    // is free (requestHint() short-circuits to showHint() once hintUsed is true).
     const isValidHint = isHintValid(currentPuzzle && currentPuzzle.hint);
 
     if (isValidHint) {
@@ -350,6 +377,13 @@ function closeHintPopup() {
     hintDisplayed = false;
     // We do NOT reset 'currentPuzzle.hintUsed' here because that tracks SCORING (if they used it at least once).
     // Re-opening is now handled by requestHint(): the timer only runs for the first request.
+
+    const hintContainer = document.getElementById('hintContainer');
+    const overlayVisible = (hintRequestOverlay && !hintRequestOverlay.classList.contains('hidden')) ||
+        (hintPenaltyOverlay && !hintPenaltyOverlay.classList.contains('hidden'));
+    if (hintContainer && !overlayVisible) {
+        hintContainer.classList.add('hidden');
+    }
 }
 
 function cleanupHintSystem() {
@@ -363,6 +397,14 @@ function cleanupHintSystem() {
         hintRequestTimeout = null;
     }
 
+    const hintRequestOverlay = document.getElementById('hintRequestOverlay');
+    const hintPenaltyOverlay = document.getElementById('hintPenaltyOverlay');
+    const hintDisplay = document.getElementById('hintDisplay');
+
+    if (hintRequestOverlay) hintRequestOverlay.classList.add('hidden');
+    if (hintPenaltyOverlay) hintPenaltyOverlay.classList.add('hidden');
+    if (hintDisplay) hintDisplay.classList.add('hidden');
+
     stopHintTabMonitoring();
     hintPenaltyActive = false;
     hintRequestConfirmed = false;
@@ -373,17 +415,20 @@ function resetHintForNewTeam() {
     hintPenaltyActive = false;
     hintRequestConfirmed = false;
     hintTabSwitchDuringPenalty = false;
+    currentPuzzleHint = null;
 
     if (currentPuzzle) {
         currentPuzzle.hintUsed = false;
     }
 
     // Reset UI elements
+    const hintContainer = document.getElementById('hintContainer');
     const hintDisplay = document.getElementById('hintDisplay');
     const hintRequestBtn = document.getElementById('hintRequestBtn');
     const hintRequestOverlay = document.getElementById('hintRequestOverlay');
     const hintPenaltyOverlay = document.getElementById('hintPenaltyOverlay');
 
+    if (hintContainer) hintContainer.classList.add('hidden');
     if (hintDisplay) hintDisplay.classList.add('hidden');
     if (hintRequestBtn) hintRequestBtn.classList.add('hidden');
     if (hintRequestOverlay) hintRequestOverlay.classList.add('hidden');

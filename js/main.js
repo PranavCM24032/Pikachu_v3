@@ -1,6 +1,40 @@
 // ==============================
 // INITIALIZATION
 // ==============================
+
+/**
+ * Universal deep-link resolver.
+ * Accepts query params (?linkid=XG01 / ?memid=M01) OR path-based links
+ * (https://<any host>/XG01 or /M01) and resolves them to a puzzle / meme.
+ */
+function resolveUniversalLink() {
+    const params = new URLSearchParams(window.location.search);
+
+    let linkId = standardizeString(params.get('linkid'));
+    let memeId = standardizeString(params.get('memid'));
+
+    // Path-based fallback: last non-empty path segment as the ID.
+    // e.g. https://host/XG01 or https://host/Pikachu_v3/M01
+    if (!linkId && !memeId) {
+        const seg = (window.location.pathname || '').split('/').filter(Boolean).pop();
+        if (seg) {
+            const std = standardizeString(seg);
+            if (MEMES.some(m => standardizeString(m.memeid) === std)) {
+                memeId = std;
+            } else if (PUZZLES.some(p => standardizeString(p.linkid) === std)) {
+                linkId = std;
+            }
+        }
+    }
+
+    const puzzle = linkId ? PUZZLES.find(p => standardizeString(p.linkid) === linkId) || null : null;
+    const meme = memeId ? MEMES.find(m => standardizeString(m.memeid) === memeId) || null : null;
+
+    if (puzzle) console.log(`[DeepLink] Puzzle locked via link: ${puzzle.linkid}`);
+    if (meme) console.log(`[DeepLink] Meme linked: ${meme.memeid}`);
+    return { puzzle, meme };
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Sessions are now persistent for a better user experience
     // localStorage.removeItem(CONFIG.STORAGE_KEYS.gameState); 
@@ -28,22 +62,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (savedTeamInfo.tid) currentTeamTid = savedTeamInfo.tid;
     } catch (e) { }
 
-    if (PUZZLES.length > 0) {
-        const params = new URLSearchParams(window.location.search);
-        const linkId = standardizeString(params.get('linkid'));
-        const foundFromUrl = PUZZLES.find(p => standardizeString(p.linkid) === linkId);
-        if (foundFromUrl) urlLockedPuzzle = foundFromUrl;
+    // Restore puzzle progression so the chain gate works across page reloads
+    try {
+        const savedState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.gameState) || '{}');
+        if (savedState.currentPuzzleId) {
+            const savedPuzzle = PUZZLES.find(p => p.id === Number(savedState.currentPuzzleId));
+            if (savedPuzzle) currentPuzzle = savedPuzzle;
+        }
+    } catch (e) { }
+
+    // Universal link system: ?linkid=XG01 / ?memid=M01 / path-based IDs
+    const { puzzle, meme } = resolveUniversalLink();
+    if (puzzle && isPuzzleAllowed(puzzle)) {
+        urlLockedPuzzle = puzzle;
+    } else if (puzzle) {
+        // Deep link points at a puzzle that isn't next in the chain — reject it
+        showToast(puzzleGateMessage(puzzle), 'error');
     }
 
     if (urlLockedPuzzle) {
         if (urlLockedPuzzle.id === 1) {
+            // Pre-fill the start key for the entry puzzle so deep links one-tap through
             const unlockCodeInput = document.getElementById('unlockCode');
-            if (unlockCodeInput) unlockCodeInput.value = "START";
+            if (unlockCodeInput) unlockCodeInput.value = urlLockedPuzzle.startCode || "START";
         }
     }
 
     updateTeamStatus();
     showStep(0);
+
+    // Auto-play memes for ?memid=M01 deep links (overlays the start screen)
+    if (meme) {
+        setTimeout(() => showMemePlayer(meme), 600);
+    }
 
     // Pause heavy animations while the tab is hidden
     document.addEventListener('visibilitychange', () => {

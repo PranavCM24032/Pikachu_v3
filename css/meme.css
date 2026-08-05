@@ -5,29 +5,25 @@
     z-index: 130;
 }
 
-/* Video clip wrapper — overflow:hidden clips the YT chrome */
+/* Video clip wrapper — the full Pokedex screen area */
 #memeVideoClip {
     position: absolute;
     inset: 0;
-    overflow: hidden;   /* ← this is the key */
-}
-
-/*
-   The YT iframe is pushed UP by 60px (hides top title/channel bar)
-   and made TALLER by 120px total (60 top + 60 bottom hides share/logo bar).
-   overflow:hidden on the parent clips everything outside.
-   No fake black strips needed.
-*/
-#memePlayerDiv {
-    position: absolute;
-    top: -60px;
-    left: 0;
-    width: 100%;
-    height: calc(100% + 120px);
+    overflow: hidden;   /* crops the YT title bar (top) and logo (bottom) */
     background: #000;
 }
 
-/* YT injects an iframe — fill the memePlayerDiv */
+/*
+   Sized/positioned in JS (fitMemePlayer) as a 9:16 box that COVERS the whole
+   screen, offset upward so the YT title bar (top) and the play/pause/skip
+   control bar (bottom) always fall outside the visible area and get cropped.
+*/
+#memePlayerDiv {
+    position: absolute;
+    background: #000;
+}
+
+/* YT injects an iframe — fill the memePlayerDiv exactly */
 #memePlayerDiv iframe {
     position: absolute !important;
     inset: 0 !important;

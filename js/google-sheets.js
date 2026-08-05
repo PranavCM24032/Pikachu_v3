@@ -41,6 +41,7 @@ async function submitToGoogleSheets(action, data = {}) {
             tid: currentTeamTid || '',
             mission: typeof currentMissionLevel !== 'undefined' ? currentMissionLevel : '',
             puzzleId: currentPuzzle?.id || 0,
+            puzzleLevel: currentPuzzle?.level,
             timestamp: new Date().toISOString(),
             ...data
         };

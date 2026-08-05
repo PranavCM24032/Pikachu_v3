@@ -1,5 +1,10 @@
 [
     {
+        "team": "TESTER",
+        "passwordHash": "123",
+        "tid": "test_id"
+    },
+    {
         "team": "PRANAV",
         "passwordHash": "123",
         "tid": "T001"

@@ -363,6 +363,8 @@
                 <button onclick="setActiveTab('L3')" id="tab-L3"
                     class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">LEVEL
                     3</button>
+                <button onclick="setActiveTab('LB')" id="tab-LB"
+                    class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">LEADERBOARD</button>
             </div>
 
             <div class="glass-panel flex-1 rounded-xl overflow-hidden flex flex-col">
@@ -379,9 +381,9 @@
                 </div>
 
                 <div class="flex-1 overflow-x-auto flex flex-col min-w-0">
-                    <div class="min-w-[1020px] flex flex-col flex-1">
+                    <div class="min-w-[1120px] flex flex-col flex-1">
                         <div class="grid gap-1 px-3 py-2.5 bg-slate-950/90 border-b border-slate-800 text-[8px] font-bold text-slate-400 uppercase tracking-widest font-mono text-center"
-                            style="grid-template-columns: 35px 100px 80px 140px 100px 85px 75px 65px 65px 95px 100px 75px;">
+                            style="grid-template-columns: 32px 95px 70px 130px 85px 75px 55px 55px 55px 80px 85px 55px 62px 62px;">
                             <div class="text-center font-mono">#</div>
                             <div class="text-center font-mono text-blue-400">Last Active</div>
                             <div class="text-center font-mono text-slate-400">TID</div>
@@ -394,6 +396,8 @@
                             <div class="text-center font-mono text-emerald-400">Solve Time</div>
                             <div class="text-center font-mono text-cyan-400">Last Node</div>
                             <div class="text-center font-mono text-slate-400">Scans</div>
+                            <div class="text-center font-mono text-emerald-300">Pts Earned</div>
+                            <div class="text-center font-mono text-red-300">Pts Lost</div>
                         </div>
 
                         <div id="logsContainer"
@@ -619,8 +623,9 @@
             const typeFilter = document.getElementById('typeFilter').value;
             const levelFilterDropdown = document.getElementById('levelFilter').value;
 
-            const L_COLS = "35px 100px 80px 140px 100px 85px 75px 65px 65px 95px 100px 75px";
+            const L_COLS = "32px 95px 70px 130px 85px 75px 55px 55px 55px 80px 85px 55px 62px 62px";
             const REG_COLS = "35px 140px 90px 180px 110px 130px";
+            const LB_COLS = "40px 120px 1fr 150px 80px 110px";
 
             if (state.activeTab === 'REG') {
                 header.style.gridTemplateColumns = REG_COLS;
@@ -631,6 +636,17 @@
                     <div class="text-left font-bold pl-1">Team Name</div>
                     <div class="text-center font-mono text-cyan-400">Language</div>
                     <div class="text-center font-mono text-indigo-400">Mission</div>
+                `;
+                header.className = "grid gap-1 px-3 py-2.5 bg-slate-950/90 border-b border-slate-800 text-[9px] font-bold text-slate-400 uppercase tracking-widest font-mono text-center";
+            } else if (state.activeTab === 'LB') {
+                header.style.gridTemplateColumns = LB_COLS;
+                header.innerHTML = `
+                    <div class="text-center font-mono">#</div>
+                    <div class="text-center font-mono text-blue-400">TID</div>
+                    <div class="text-left font-bold pl-1">Team Name</div>
+                    <div class="text-center font-mono text-slate-400">Last Active</div>
+                    <div class="text-center font-mono text-slate-400">Scans</div>
+                    <div class="text-center font-mono text-emerald-300">Total Pts</div>
                 `;
                 header.className = "grid gap-1 px-3 py-2.5 bg-slate-950/90 border-b border-slate-800 text-[9px] font-bold text-slate-400 uppercase tracking-widest font-mono text-center";
             } else {
@@ -648,6 +664,8 @@
                     <div class="text-center font-mono text-emerald-400">Solve Time</div>
                     <div class="text-center font-mono text-cyan-400">Last Node</div>
                     <div class="text-center font-mono text-slate-400">Scans</div>
+                    <div class="text-center font-mono text-emerald-300">Pts Earned</div>
+                    <div class="text-center font-mono text-red-300">Pts Lost</div>
                 `;
                 header.className = "grid gap-1 px-3 py-2.5 bg-slate-950/90 border-b border-slate-800 text-[8px] font-bold text-slate-400 uppercase tracking-widest font-mono text-center";
             }
@@ -715,7 +733,9 @@
                         solveTime: log.solveTime || '',
                         nodesPath: log.nodesPath || log.l3Path || '',
                         lastNode: log.lastNode || '-',
-                        totalScans: parseInt(log.totalScans || 0, 10)
+                        totalScans: parseInt(log.totalScans || 0, 10),
+                        pointsEarned: parseInt(log.pointsEarned || 0, 10),
+                        pointsLost: parseInt(log.pointsLost || 0, 10)
                     };
                 }
             });
@@ -772,6 +792,62 @@
             });
             document.getElementById('badgeCount').textContent = totalSolved;
 
+            const formatTime = (ts) => {
+                if (!ts) return '-';
+                const d = new Date(ts);
+                return !isNaN(d.getTime()) ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : ts;
+            };
+
+            if (state.activeTab === 'LB') {
+                const lb = Object.values(teamMap).map(t => {
+                    let scans = 0;
+                    let pts = 0;
+                    let lastActive = '';
+                    ['L1', 'L2', 'L3'].forEach(l => {
+                        const d = t.levels[l];
+                        if (!d) return;
+                        scans += parseInt(d.totalScans || 0, 10);
+                        pts += (parseInt(d.pointsEarned || 0, 10) - parseInt(d.pointsLost || 0, 10));
+                        if (d.lastActive && (!lastActive || d.lastActive > lastActive)) lastActive = d.lastActive;
+                    });
+                    if (!lastActive) lastActive = t.regTime || '';
+                    return { name: t.name, teamName: t.teamName, tid: t.tid || '-', lastActive: lastActive, scans: scans, pts: pts, mission: t.mission };
+                });
+
+                let lbRows = lb;
+                if (searchTerm) lbRows = lbRows.filter(r => r.name.toLowerCase().includes(searchTerm) || r.tid.toLowerCase().includes(searchTerm));
+                if (typeFilter !== 'ALL') lbRows = lbRows.filter(r => r.mission && r.mission.includes(typeFilter));
+
+                lbRows.sort((a, b) => (b.pts - a.pts) || a.name.localeCompare(b.name));
+
+                document.getElementById('teamCount').textContent = lbRows.length;
+
+                if (lbRows.length === 0) {
+                    container.innerHTML = `
+                        <div class="flex flex-col items-center justify-center h-full text-slate-600 opacity-50 fade-in py-12">
+                            <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span class="font-mono text-xs">NO DATA AVAILABLE FOR THIS TAB</span>
+                            ${state.usingCachedData ? '<span class="text-[10px] text-amber-500 mt-1">(Using cached data)</span>' : ''}
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = lbRows.map((r, i) => {
+                    const rank = i + 1;
+                    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+                    return `
+                    <div class="grid gap-1 px-3 py-2.5 border-b border-slate-800/50 hover:bg-white/5 transition-all items-center text-[10px] sm:text-xs text-center fade-in" style="grid-template-columns: ${LB_COLS}">
+                        <div class="text-slate-500 font-mono">${medal}</div>
+                        <div class="font-mono text-blue-400 font-bold truncate">${escapeHTML(r.tid)}</div>
+                        <div class="text-left font-bold text-slate-200 uppercase tracking-tight truncate pl-1" title="${escapeHTML(r.name)}">${escapeHTML(r.name)}</div>
+                        <div class="text-slate-400 font-mono text-[10px]">${escapeHTML(formatTime(r.lastActive))}</div>
+                        <div class="font-mono text-slate-300">${r.scans}</div>
+                        <div class="font-mono font-bold ${r.pts > 0 ? 'text-emerald-300' : 'text-slate-500'}">${r.pts}</div>
+                    </div>`;
+                }).join('');
+                return;
+            }
+
             if (leaderboard.length === 0) {
                 container.innerHTML = `
                     <div class="flex flex-col items-center justify-center h-full text-slate-600 opacity-50 fade-in py-12">
@@ -781,12 +857,6 @@
                     </div>`;
                 return;
             }
-
-            const formatTime = (ts) => {
-                if (!ts) return '-';
-                const d = new Date(ts);
-                return !isNaN(d.getTime()) ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : ts;
-            };
 
             container.innerHTML = leaderboard.map((team, index) => {
                 if (state.activeTab === 'REG') {
@@ -814,7 +884,9 @@
                     solveTime: '',
                     nodesPath: '',
                     lastNode: '-',
-                    totalScans: 0
+                    totalScans: 0,
+                    pointsEarned: 0,
+                    pointsLost: 0
                 };
 
                 const lastActiveStr = formatTime(lvlData.lastActive);
@@ -845,6 +917,8 @@
                     <div class="font-mono text-emerald-400 text-[8px]">${escapeHTML(solveTimeStr)}</div>
                     <div class="font-mono text-cyan-400 truncate text-[8px]" title="${escapeHTML(lvlData.nodesPath)}">${escapeHTML(lvlData.lastNode)}</div>
                     <div class="font-mono text-slate-400 text-[8px]">${lvlData.totalScans || 0}</div>
+                    <div class="font-mono text-emerald-300 text-[8px] font-bold">${lvlData.pointsEarned || 0}</div>
+                    <div class="font-mono text-red-300 text-[8px] font-bold">${lvlData.pointsLost || 0}</div>
                 </div>`;
             }).join('');
         }

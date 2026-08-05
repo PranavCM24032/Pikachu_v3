@@ -16,6 +16,7 @@ const CONFIG = {
     STORAGE_KEYS: {
         hintState: 'pykachuHintState',
         gameState: 'pykachuGameState',
-        teamInfo: 'pykachuTeam'
+        teamInfo: 'pykachuTeam',
+        scoreState: 'pykachuScoreState'
     }
 };
